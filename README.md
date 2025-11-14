@@ -19,3 +19,25 @@ The application uses data downloaded from Kaggle—a dataset sourced from Fragra
 ## Local Setup (Requirements)
 
 To run this application on your local machine, you need Python (recommended version 3.9+) and the following libraries:
+pip install -r requirements.txt
+PerfumeFinder/
+├── app.py              # Main Streamlit application code
+├── fra_perfumes.csv    # The core data file (Crucial: the cleaned perfumes data, not the reviews file)
+├── requirements.txt    # List of required Python packages
+└── README.md           # This project description file
+### How to Run
+
+### How to Run
+
+1. Open your Command Prompt (CMD) or Terminal inside the `PerfumeFinder` folder.
+
+2. Execute the command:
+The application should automatically open in.
+
+## Acknowledgements
+
+This project utilizes an open dataset created by Olga Gmiufana.
+
+* **Dataset:** Fragrantica.com Fragrance Dataset
+* **Author:** Olga Gmiufana
+* **Kaggle Source:** [https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset](https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset)
