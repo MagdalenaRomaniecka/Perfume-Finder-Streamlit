@@ -10,11 +10,9 @@ The application uses data downloaded from Kaggle—a dataset sourced from Fragra
 
 ## Key Features
 
-1. **Advanced Filtering:** Filter perfumes based on selected accords (e.g., "vanilla", "woody", "citrus"), gender, and a minimum user rating.
-
-2. **Results Gallery:** Display matching perfumes in a dynamic gallery format with images and key information.
-
-3. **Market Insights:** A second tab provides visual analysis of market trends, such as rating distribution and the most popular fragrance accords using Plotly.
+1.  **Advanced Filtering:** Filter perfumes based on selected accords (e.g., "vanilla", "woody", "citrus"), gender, and a minimum user rating.
+2.  **Results Gallery:** Display matching perfumes in a dynamic gallery format with images and key information.
+3.  **Market Insights:** A second tab provides visual analysis of market trends, such as rating distribution and the most popular fragrance accords using Plotly.
 
 ## 🚀 Getting Started: Running the App Locally
 
@@ -28,7 +26,7 @@ Before you begin, make sure you have the following installed:
 
 ### Step 2: Download the Project & Data
 
-1.  **Clone the repository** (lub pobierz plik ZIP z GitHuba):
+1.  **Clone the repository** (or download the ZIP file):
     ```bash
     git clone [https://github.com/MagdalenaRomaniecka/Perfume-Finder-Streamlit.git](https://github.com/MagdalenaRomaniecka/Perfume-Finder-Streamlit.git)
     ```
@@ -39,10 +37,10 @@ Before you begin, make sure you have the following installed:
 3.  **Add your data file:** Download the `fra_perfumes.csv` file from the [Kaggle Dataset](https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset) and place it **inside** the `Perfume-Finder-Streamlit` folder.
 
     Your folder must look like this:
-    ```
+    ```text
     Perfume-Finder-Streamlit/
     ├── app.py
-    ├── fra_perfumes.csv   <-- IMPORTANT!
+    ├── fra_perfumes.csv    # <-- IMPORTANT!
     ├── requirements.txt
     └── README.md
     ```
@@ -57,8 +55,10 @@ streamlit run app.py
 ## Acknowledgements
 
 This project utilizes an open dataset created by Olga Gmiufana.
+## Acknowledgements
 
- **Dataset:** Fragrantica.com Fragrance Dataset
- **Author:** Olga Gmiufana
- **Kaggle Source:** https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset
+This project utilizes an open dataset created by Olga Gmiufana.
 
+* **Dataset:** Fragrantica.com Fragrance Dataset
+* **Author:** Olga Gmiufana
+* **Kaggle Source:** [https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset](https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset)
