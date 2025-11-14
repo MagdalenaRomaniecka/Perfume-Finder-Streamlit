@@ -58,6 +58,7 @@ streamlit run app.py
 
 This project utilizes an open dataset created by Olga Gmiufana.
 
-* **Dataset:** Fragrantica.com Fragrance Dataset
-* **Author:** Olga Gmiufana
-* **Kaggle Source:** https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset
+ **Dataset:** Fragrantica.com Fragrance Dataset
+ **Author:** Olga Gmiufana
+ **Kaggle Source:** https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset
+
