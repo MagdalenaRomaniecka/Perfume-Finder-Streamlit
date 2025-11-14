@@ -1,8 +1,21 @@
-🔎 Perfume Finder: Intelligent Fragrance Search EngineProject GoalThe Perfume Finder project is an interactive web application built using Streamlit and the Pandas library. Its purpose is to explore and filter a vast collection of perfumery data, enabling users to quickly find perfumes matched to their preferences based on main fragrance accords, gender, and rating score.Data SourceThe application uses data downloaded from Kaggle—a dataset sourced from Fragrantica.com (specifically the fra_perfumes.csv file).Key FeaturesAdvanced Filtering: Filter perfumes based on selected accords (e.g., "vanilla", "woody", "citrus"), gender, and a minimum user rating.Results Gallery: Display matching perfumes in a dynamic gallery format with images and key information.Market Insights: A second tab provides visual analysis of market trends, such as rating distribution and the most popular fragrance accords using Plotly.Local Setup (Requirements)To run this application on your local machine, you need Python (recommended version 3.9+) and the following libraries:pip install -r requirements.txt
-Folder StructureEnsure your project folder structure is as follows:PerfumeFinder/
-├── app.py              # Main Streamlit application code
-├── fra_perfumes.csv    # The core data file (Crucial: the cleaned perfumes data, not the reviews file)
-├── requirements.txt    # List of required Python packages
-└── README.md           # This project description file
-How to RunOpen your Command Prompt (CMD) or Terminal inside the PerfumeFinder folder.Execute the command:streamlit run app.py
-The application should automatically open in.AcknowledgementsThis project utilizes an open dataset created by Olga Gmiufana.Dataset: Fragrantica.com Fragrance DatasetAuthor: Olga GmiufanaKaggle Source: https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset
+# 🔎 Perfume Finder: Intelligent Fragrance Search Engine
+
+## Project Goal
+
+The **Perfume Finder** project is an interactive web application built using Streamlit and the Pandas library. Its purpose is to explore and filter a vast collection of perfumery data, enabling users to quickly find perfumes matched to their preferences based on main fragrance accords, gender, and rating score.
+
+## Data Source
+
+The application uses data downloaded from Kaggle—a dataset sourced from Fragrantica.com (specifically the `fra_perfumes.csv` file).
+
+## Key Features
+
+1. **Advanced Filtering:** Filter perfumes based on selected accords (e.g., "vanilla", "woody", "citrus"), gender, and a minimum user rating.
+
+2. **Results Gallery:** Display matching perfumes in a dynamic gallery format with images and key information.
+
+3. **Market Insights:** A second tab provides visual analysis of market trends, such as rating distribution and the most popular fragrance accords using Plotly.
+
+## Local Setup (Requirements)
+
+To run this application on your local machine, you need Python (recommended version 3.9+) and the following libraries:
