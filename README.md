@@ -53,3 +53,11 @@ While in the project folder, install all required libraries with this command:
 
 ```bash
 pip install -r requirements.txt
+streamlit run app.py
+## Acknowledgements
+
+This project utilizes an open dataset created by Olga Gmiufana.
+
+* **Dataset:** Fragrantica.com Fragrance Dataset
+* **Author:** Olga Gmiufana
+* **Kaggle Source:** https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset
