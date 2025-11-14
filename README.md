@@ -16,28 +16,40 @@ The application uses data downloaded from Kaggle—a dataset sourced from Fragra
 
 3. **Market Insights:** A second tab provides visual analysis of market trends, such as rating distribution and the most popular fragrance accords using Plotly.
 
-## Local Setup (Requirements)
+## 🚀 Getting Started: Running the App Locally
 
-To run this application on your local machine, you need Python (recommended version 3.9+) and the following libraries:
+Follow these simple steps to get the Perfume Finder running on your own computer.
+
+### Step 1: Prerequisites (What You Need)
+
+Before you begin, make sure you have the following installed:
+* **Python:** Version 3.9 or newer is recommended.
+* **Git:** (Optional, but good for downloading from GitHub).
+
+### Step 2: Download the Project & Data
+
+1.  **Clone the repository** (lub pobierz plik ZIP z GitHuba):
+    ```bash
+    git clone [https://github.com/MagdalenaRomaniecka/Perfume-Finder-Streamlit.git](https://github.com/MagdalenaRomaniecka/Perfume-Finder-Streamlit.git)
+    ```
+2.  **Navigate into the project folder:**
+    ```bash
+    cd Perfume-Finder-Streamlit
+    ```
+3.  **Add your data file:** Download the `fra_perfumes.csv` file from the [Kaggle Dataset](https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset) and place it **inside** the `Perfume-Finder-Streamlit` folder.
+
+    Your folder must look like this:
+    ```
+    Perfume-Finder-Streamlit/
+    ├── app.py
+    ├── fra_perfumes.csv   <-- IMPORTANT!
+    ├── requirements.txt
+    └── README.md
+    ```
+
+### Step 3: Install Dependencies
+
+While in the project folder, install all required libraries with this command:
+
+```bash
 pip install -r requirements.txt
-PerfumeFinder/
-├── app.py              # Main Streamlit application code
-├── fra_perfumes.csv    # The core data file (Crucial: the cleaned perfumes data, not the reviews file)
-├── requirements.txt    # List of required Python packages
-└── README.md           # This project description file
-### How to Run
-
-### How to Run
-
-1. Open your Command Prompt (CMD) or Terminal inside the `PerfumeFinder` folder.
-
-2. Execute the command:
-The application should automatically open in.
-
-## Acknowledgements
-
-This project utilizes an open dataset created by Olga Gmiufana.
-
-* **Dataset:** Fragrantica.com Fragrance Dataset
-* **Author:** Olga Gmiufana
-* **Kaggle Source:** [https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset](https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset)
