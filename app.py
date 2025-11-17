@@ -39,7 +39,8 @@ def load_data(filepath):
         
         # Ekstrakcja unikalnych akordów
         all_accords_str = ",".join(df['main_accords'].unique())
-        all_accords_list = [accord.strip() for accord in all_accords_str.split(",")]
+        # Poprawka: zamieniamy wszystkie akordy na małe litery
+        all_accords_list = [accord.strip().lower() for accord in all_accords_str.split(",")]
         unique_accords = sorted(list(set(all_accords_list)))
         
         return df, unique_accords
@@ -96,11 +97,17 @@ if df is not None:
         st.image("https://i.imgur.com/Kz81y1S.png", use_column_width=True)
         st.title("Filtry Wyszukiwania")
 
+        # --- NOWA POPRAWKA: Bezpieczne filtry domyślne ---
+        # Sprawdzamy, które z domyślnych wartości FAKTYCZNIE istnieją w danych
+        desired_defaults = ["vanilla", "sweet", "powdery"]
+        # Używamy tylko tych, które istnieją, aby uniknąć błędu
+        actual_defaults = [d for d in desired_defaults if d in unique_accords]
+
         # Filtr 1: Akordy zapachowe
         selected_accords = st.multiselect(
             "Wybierz główne akordy:",
             options=unique_accords,
-            default=["vanilla", "sweet", "powdery"]
+            default=actual_defaults  # Zmieniono, aby używać bezpiecznych filtrów
         )
 
         # Filtr 2: Płeć
@@ -140,8 +147,10 @@ if df is not None:
             def contains_all_accords(row_accords):
                 if pd.isna(row_accords):
                     return False
+                # Zamieniamy akordy wiersza na małe litery przed porównaniem
+                row_accords_lower = row_accords.lower()
                 for accord in selected_accords:
-                    if accord not in row_accords:
+                    if accord not in row_accords_lower:
                         return False
                 return True
             mask = filtered_df['main_accords'].apply(contains_all_accords)
@@ -183,7 +192,8 @@ if df is not None:
         
         all_accords_flat_list = []
         for accord_string in df['main_accords'].dropna():
-            all_accords_flat_list.extend([acc.strip() for acc in accord_string.split(",")])
+            # Poprawka: Używamy .lower() aby zliczać "Vanilla" i "vanilla" jako to samo
+            all_accords_flat_list.extend([acc.strip().lower() for acc in accord_string.split(",")])
         
         accords_counts = pd.Series(all_accords_flat_list).value_counts()
         top_15_accords = accords_counts.head(15).sort_values(ascending=True)
