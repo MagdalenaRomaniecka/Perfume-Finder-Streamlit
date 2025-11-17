@@ -10,10 +10,63 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- Custom CSS Function ---
+def load_custom_css():
+    """Injects custom CSS for a more aesthetic look."""
+    st.markdown("""
+        <style>
+        /* Import Google Font */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+
+        /* Set font for the entire app */
+        html, body, [class*="st-"], [class*="css-"] {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Main app background */
+        [data-testid="stAppViewContainer"] {
+            background-color: #FDF8F5; /* Soft cream/beige */
+        }
+
+        /* Sidebar background */
+        [data-testid="stSidebar"] {
+            background-color: #F5F1EE; /* Slightly darker shade */
+            border-right: 1px solid #E0D8D3;
+        }
+
+        /* Perfume cards (THE MOST IMPORTANT PART) */
+        [data-testid="stVerticalBlockBorder"] {
+            background-color: #FFFFFF;
+            border-radius: 15px; /* Rounded corners */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Subtle shadow */
+            border: none; /* Remove default border */
+            padding: 1.2em !important; /* A bit more internal padding */
+        }
+        
+        /* Image on the card */
+        .stImage img {
+            border-radius: 10px;
+        }
+
+        /* Rating metric */
+        [data-testid="stMetric"] {
+            background-color: #FAFAFA;
+            border-radius: 10px;
+            padding: 10px;
+            border: 1px solid #EEE;
+        }
+
+        /* Titles (e.g., "Search Filters") */
+        h1, h2, h3 {
+            font-weight: 600;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
 # --- Helper Functions ---
 
 @st.cache_data
-def load_data(filepath):
+def load_data(filepath, cache_buster_v5): # Cache buster parameter
     """Loads and preprocesses data from a CSV file."""
     try:
         df = pd.read_csv(filepath)
@@ -25,7 +78,7 @@ def load_data(filepath):
             'Rating Value': 'score',
             'Rating Count': 'ratings',
             'Main Accords': 'main_accords',
-            'url': 'img_link'  # Assuming the image link column is named 'url'
+            'url': 'img_link'
         }, inplace=True)
         
         # Data cleaning: remove rows without key information
@@ -35,12 +88,12 @@ def load_data(filepath):
         if df['score'].dtype == 'object':
             df['score'] = df['score'].str.replace(',', '.').astype(float)
         
-        # --- OSTATECZNA POPRAWKA CZYSZCZENIA ---
+        # Robust accord cleaning logic
         all_accords_flat_list = []
         for accord_string in df['main_accords'].dropna():
             accords = accord_string.split(",")
             for accord in accords:
-                # OSTATECZNA LOGIKA: strip -> strip quotes -> strip AGAIN -> lower
+                # Final logic: strip -> strip quotes -> strip AGAIN -> lower
                 cleaned_accord = accord.strip().strip("'\"").strip().lower()
                 if cleaned_accord: 
                     all_accords_flat_list.append(cleaned_accord)
@@ -52,12 +105,10 @@ def load_data(filepath):
     except FileNotFoundError:
         st.error(f"Error: Data file not found at path: {filepath}.")
         st.error(f"Please make sure the `fra_perfumes.csv` file is in the same folder as `app.py`.")
-        st.info("Download the file from: https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset")
         return None, []
     except KeyError as e:
         st.error(f"Critical Error: Expected columns not found in CSV file: {e}")
         st.error("Please check if your `fra_perfumes.csv` file contains the columns: 'Name', 'Gender', 'Rating Value', 'Rating Count', 'Main Accords', 'url'.")
-        st.info("If your columns are named differently, we need to update the `df.rename()` block in the code.")
         return None, []
     except Exception as e:
         st.error(f"An unexpected error occurred while loading data: {e}")
@@ -66,9 +117,8 @@ def load_data(filepath):
 def display_perfume_card(perfume):
     """Displays a single perfume card in the gallery."""
     
-    # --- KRYTYCZNA POPRAWKA: .itertuples() ---
-    # Używamy .itertuples() w pętli (linia 180), więc musimy używać
-    # notacji z KROPKĄ (perfume.name) zamiast nawiasów (perfume['name']).
+    # We are using .itertuples() in the main loop,
+    # so we must use dot notation (perfume.name) instead of (perfume['name']).
     
     with st.container(border=True):
         col1, col2 = st.columns([1, 2])
@@ -90,19 +140,23 @@ def display_perfume_card(perfume):
                 st.markdown("**Accords:** " + " ".join(accords_list))
 
 # --- Main Application ---
-df, unique_accords = load_data("fra_perfumes.csv")
+
+# Load the custom CSS styles
+load_custom_css()
+
+# Load the data (with cache buster)
+df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v5="v5")
 
 if df is not None:
     # --- Sidebar ---
     with st.sidebar:
-        st.image("https://i.imgur.com/Kz81y1S.png", use_column_width=True)
         st.title("Search Filters")
         
         # Filter 1: Scent Accords
         selected_accords = st.multiselect(
             "Select main accords:",
             options=unique_accords,
-            default=[]  # Domyślnie pusta lista
+            default=[]  # Default to empty list
         )
 
         # Filter 2: Gender
@@ -123,7 +177,7 @@ if df is not None:
         )
         
         st.markdown("---")
-        st.info("Project created by Magdalena Romaniecka. Data from Kaggle.")
+        st.info("Project by Magdalena Romaniecka. Data from Kaggle.")
 
     # --- Main Page Content ---
     tab1, tab2 = st.tabs(["**🔎 Find Perfumes**", "**📊 Market Statistics**"])
@@ -138,12 +192,12 @@ if df is not None:
         filtered_df = filtered_df[filtered_df['score'] >= min_score]
 
         if selected_accords:
-            # --- OSTATECZNA POPRAWKA CZYSZCZENIA ---
+            # Robust accord filtering function
             def contains_all_accords(row_accords_str):
                 if pd.isna(row_accords_str):
                     return False
                 
-                # OSTATECZNA LOGIKA: strip -> strip quotes -> strip AGAIN -> lower
+                # Final logic: strip -> strip quotes -> strip AGAIN -> lower
                 row_accords_list = [acc.strip().strip("'\"").strip().lower() for acc in row_accords_str.split(",")]
                 
                 for selected in selected_accords:
@@ -188,12 +242,12 @@ if df is not None:
         # Chart 2: Most popular accords (Bar chart)
         st.subheader("Top 15 Most Common Scent Accords")
         
-        # --- OSTATECZNA POPRAWKA CZYSZCZENIA ---
+        # Robust accord cleaning logic (for chart)
         all_accords_flat_list = []
         for accord_string in df['main_accords'].dropna():
             accords = accord_string.split(",")
             for accord in accords:
-                # OSTATECZNA LOGIKA: strip -> strip quotes -> strip AGAIN -> lower
+                # Final logic: strip -> strip quotes -> strip AGAIN -> lower
                 cleaned_accord = accord.strip().strip("'\"").strip().lower()
                 if cleaned_accord:
                     all_accords_flat_list.append(cleaned_accord)
