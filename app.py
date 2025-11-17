@@ -146,7 +146,10 @@ if df is not None:
 
         # Filtering logic
         filtered_df = df[df['gender'] == selected_gender].copy()
-        filtered_df = filtered_df[filtered_score'] >= min_score]
+        
+        # --- POPRAWKA BŁĘDU SKŁADNI (SyntaxError) ---
+        # Ta linia poniżej miała błąd, teraz jest poprawna:
+        filtered_df = filtered_df[filtered_df['score'] >= min_score]
 
         if selected_accords:
             # --- POPRAWKA 2: Solidna logika filtrowania ---
