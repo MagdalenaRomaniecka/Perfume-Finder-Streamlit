@@ -1,0 +1,23 @@
+# Virtual environment files
+venv/
+.venv/
+env/
+.env/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data files - should not be on GitHub!
+*.csv
+*.json
+*.sqlite
+*.db
