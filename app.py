@@ -18,12 +18,19 @@ def load_data(filepath):
     try:
         df = pd.read_csv(filepath)
         
-        # --- USUNIĘTO BLOK df.rename() ---
-        # Plik CSV z Kaggle ma już poprawne angielskie nazwy kolumn,
-        # więc nie musimy ich zmieniać.
+        # --- POPRAWKA 1: DODAJEMY POPRAWNY BLOK RENAME ---
+        # Tłumaczymy nazwy z Twojego pliku CSV na te, których używa aplikacja
+        df.rename(columns={
+            'Name': 'name',
+            'Gender': 'gender',
+            'Rating Value': 'score',
+            'Rating Count': 'ratings',
+            'Main Accords': 'main_accords',
+            'url': 'img_link'  # Zakładamy, że kolumna z linkiem do obrazka nazywa się 'url'
+        }, inplace=True)
         
         # Czystka danych: usuwanie wierszy bez kluczowych informacji
-        # Ta linia teraz zadziała, bo kolumny istnieją w CSV
+        # Teraz te kolumny (po zmianie nazwy) zostaną znalezione
         df.dropna(subset=['main_accords', 'name', 'img_link'], inplace=True)
         
         # Konwersja ocen na typ numeryczny (zastępowanie ',' na '.')
@@ -44,8 +51,8 @@ def load_data(filepath):
         return None, []
     except KeyError as e:
         st.error(f"Błąd krytyczny: Nie znaleziono oczekiwanych kolumn w pliku CSV: {e}")
-        st.error("Wygląda na to, że plik `fra_perfumes.csv` ma inną strukturę niż oczekiwano.")
-        st.info("Upewnij się, że pobrałaś właściwy plik z Kaggle.")
+        st.error("Sprawdź, czy Twój plik `fra_perfumes.csv` na pewno zawiera kolumny: 'Name', 'Gender', 'Rating Value', 'Rating Count', 'Main Accords', 'url'.")
+        st.info("Jeśli Twoje kolumny nazywają się inaczej, musimy zaktualizować blok `df.rename()` w kodzie.")
         return None, []
     except Exception as e:
         st.error(f"Wystąpił nieoczekiwany błąd podczas ładowania danych: {e}")
@@ -64,7 +71,10 @@ def display_perfume_card(perfume):
 
         with col2:
             st.markdown(f"**{perfume['name']}**")
-            st.markdown(f"*{perfume['brand']}*")
+            
+            # --- POPRAWKA 2: USUWAMY LINIĘ Z 'brand' ---
+            # Twój plik CSV nie ma kolumny 'brand', więc ją usunęliśmy, aby uniknąć błędu
+            # st.markdown(f"*{perfume['brand']}*") 
             
             score_str = f"{perfume['score']:.2f}".replace('.', ',')
             st.metric(label="Ocena", value=score_str, delta=f"{perfume['ratings']} ocen")
