@@ -18,7 +18,6 @@ def load_data(filepath):
     try:
         df = pd.read_csv(filepath)
         
-        # --- FIX 1: ADDING THE CORRECT RENAME BLOCK ---
         # Translate column names from your CSV file to the ones the app uses
         df.rename(columns={
             'Name': 'name',
@@ -72,7 +71,6 @@ def display_perfume_card(perfume):
         with col2:
             st.markdown(f"**{perfume['name']}**")
             
-            # --- FIX 2: REMOVED THE 'brand' LINE ---
             # Your CSV file doesn't have a 'brand' column, so we removed it to avoid errors
             # st.markdown(f"*{perfume['brand']}*") 
             
@@ -96,7 +94,6 @@ if df is not None:
         st.image("https://i.imgur.com/Kz81y1S.png", use_column_width=True)
         st.title("Search Filters")
 
-        # --- NEW FIX: Safe default filters ---
         # Check which of the default values ACTUALLY exist in the data
         desired_defaults = ["vanilla", "sweet", "powdery"]
         # Use only those that exist to avoid errors
@@ -192,7 +189,7 @@ if df is not None:
         
         all_accords_flat_list = []
         for accord_string in df['main_accords'].dropna():
-            # Fix: Use .lower() to count "Vanilla" and "vanilla" as the same
+            # Use .lower() to count "Vanilla" and "vanilla" as the same
             all_accords_flat_list.extend([acc.strip().lower() for acc in accord_string.split(",")])
         
         accords_counts = pd.Series(all_accords_flat_list).value_counts()
