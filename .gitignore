@@ -17,7 +17,6 @@ __pycache__/
 *.swo
 
 # Data files - should not be on GitHub!
-*.csv
 *.json
 *.sqlite
 *.db
