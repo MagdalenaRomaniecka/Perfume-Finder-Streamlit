@@ -65,23 +65,28 @@ def load_data(filepath):
 
 def display_perfume_card(perfume):
     """Displays a single perfume card in the gallery."""
+    
+    # --- KRYTYCZNA POPRAWKA: .itertuples() ---
+    # Używamy .itertuples() w pętli (linia 180), więc musimy używać
+    # notacji z KROPKĄ (perfume.name) zamiast nawiasów (perfume['name']).
+    
     with st.container(border=True):
         col1, col2 = st.columns([1, 2])
         
         with col1:
-            if perfume['img_link'] and isinstance(perfume['img_link'], str):
-                st.image(perfume['img_link'], use_column_width=True)
+            if perfume.img_link and isinstance(perfume.img_link, str):
+                st.image(perfume.img_link, use_column_width=True)
             else:
                 st.image("https://placehold.co/200x200/eee/ccc?text=No+Image", use_column_width=True)
 
         with col2:
-            st.markdown(f"**{perfume['name']}**")
+            st.markdown(f"**{perfume.name}**")
             
-            score_str = f"{perfume['score']:.2f}"
-            st.metric(label="Rating", value=score_str, delta=f"{perfume['ratings']} ratings")
+            score_str = f"{perfume.score:.2f}"
+            st.metric(label="Rating", value=score_str, delta=f"{perfume.ratings} ratings")
             
-            if perfume['main_accords']:
-                accords_list = [f"`{acc.strip()}`" for acc in perfume['main_accords'].split(",")]
+            if perfume.main_accords:
+                accords_list = [f"`{acc.strip()}`" for acc in perfume.main_accords.split(",")]
                 st.markdown("**Accords:** " + " ".join(accords_list))
 
 # --- Main Application ---
@@ -177,4 +182,34 @@ if df is not None:
             title="Histogram of all perfume ratings",
             labels={"score": "Rating (from 1 to 5)"}
         )
-        fig
+        fig_hist.update_layout(bargap=0.1)
+        st.plotly_chart(fig_hist, use_container_width=True)
+
+        # Chart 2: Most popular accords (Bar chart)
+        st.subheader("Top 15 Most Common Scent Accords")
+        
+        # --- OSTATECZNA POPRAWKA CZYSZCZENIA ---
+        all_accords_flat_list = []
+        for accord_string in df['main_accords'].dropna():
+            accords = accord_string.split(",")
+            for accord in accords:
+                # OSTATECZNA LOGIKA: strip -> strip quotes -> strip AGAIN -> lower
+                cleaned_accord = accord.strip().strip("'\"").strip().lower()
+                if cleaned_accord:
+                    all_accords_flat_list.append(cleaned_accord)
+        
+        accords_counts = pd.Series(all_accords_flat_list).value_counts()
+        top_15_accords = accords_counts.head(15).sort_values(ascending=True)
+
+        fig_bar = px.bar(
+            top_15_accords,
+            x=top_15_accords.values,
+            y=top_15_accords.index,
+            orientation='h',
+            title="Top 15 Accords in the database",
+            labels={"x": "Number of occurrences", "y": "Accord"}
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
+else:
+    st.header("Application could not be started.")
+    st.warning("Please resolve the data loading issue to continue.")
