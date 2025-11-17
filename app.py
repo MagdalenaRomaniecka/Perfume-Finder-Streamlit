@@ -35,18 +35,16 @@ def load_data(filepath):
         if df['score'].dtype == 'object':
             df['score'] = df['score'].str.replace(',', '.').astype(float)
         
-        # --- POPRAWKA 1: Solidne czyszczenie akordów ---
-        # Tworzymy płaską listę wszystkich akordów ze wszystkich wierszy
+        # --- OSTATECZNA POPRAWKA CZYSZCZENIA ---
         all_accords_flat_list = []
         for accord_string in df['main_accords'].dropna():
             accords = accord_string.split(",")
             for accord in accords:
-                # Czyścimy spacje ORAZ cudzysłowy i zamieniamy na małe litery
-                cleaned_accord = accord.strip().strip("'\"").lower()
-                if cleaned_accord: # Unikamy dodawania pustych stringów
+                # OSTATECZNA LOGIKA: strip -> strip quotes -> strip AGAIN -> lower
+                cleaned_accord = accord.strip().strip("'\"").strip().lower()
+                if cleaned_accord: 
                     all_accords_flat_list.append(cleaned_accord)
         
-        # Tworzymy unikalną, posortowaną listę z czystych danych
         unique_accords = sorted(list(set(all_accords_flat_list)))
         
         return df, unique_accords
@@ -79,9 +77,6 @@ def display_perfume_card(perfume):
         with col2:
             st.markdown(f"**{perfume['name']}**")
             
-            # Your CSV file doesn't have a 'brand' column, so we removed it to avoid errors
-            # st.markdown(f"*{perfume['brand']}*") 
-            
             score_str = f"{perfume['score']:.2f}"
             st.metric(label="Rating", value=score_str, delta=f"{perfume['ratings']} ratings")
             
@@ -90,35 +85,27 @@ def display_perfume_card(perfume):
                 st.markdown("**Accords:** " + " ".join(accords_list))
 
 # --- Main Application ---
-
-# Load data
 df, unique_accords = load_data("fra_perfumes.csv")
 
-# Check if data was loaded successfully
 if df is not None:
-
     # --- Sidebar ---
     with st.sidebar:
         st.image("https://i.imgur.com/Kz81y1S.png", use_column_width=True)
         st.title("Search Filters")
-
-        # --- POPRAWKA UX: Usunięto domyślne akordy ---
-        # Usunęliśmy domyślne akordy, aby aplikacja pokazywała wyniki przy pierwszym ładowaniu.
         
         # Filter 1: Scent Accords
         selected_accords = st.multiselect(
             "Select main accords:",
             options=unique_accords,
-            default=[]  # Zmieniono na pustą listę!
+            default=[]  # Domyślnie pusta lista
         )
 
         # Filter 2: Gender
-        # The options MUST match the data in your 'Gender' column from the CSV
         gender_options = ["Female", "Male", "Unisex"] 
         selected_gender = st.selectbox(
             "Select gender:",
             options=gender_options,
-            index=0  # Defaults to 'Female'
+            index=0 
         )
 
         # Filter 3: Minimum rating
@@ -134,7 +121,6 @@ if df is not None:
         st.info("Project created by Magdalena Romaniecka. Data from Kaggle.")
 
     # --- Main Page Content ---
-    
     tab1, tab2 = st.tabs(["**🔎 Find Perfumes**", "**📊 Market Statistics**"])
 
     # --- Tab 1: Perfume Finder ---
@@ -144,25 +130,21 @@ if df is not None:
 
         # Filtering logic
         filtered_df = df[df['gender'] == selected_gender].copy()
-        
-        # --- POPRAWKA BŁĘDU SKŁADNI (SyntaxError) ---
-        # Ta linia poniżej miała błąd, teraz jest poprawna:
         filtered_df = filtered_df[filtered_df['score'] >= min_score]
 
         if selected_accords:
-            # --- POPRAWKA 2: Solidna logika filtrowania ---
+            # --- OSTATECZNA POPRAWKA CZYSZCZENIA ---
             def contains_all_accords(row_accords_str):
                 if pd.isna(row_accords_str):
                     return False
                 
-                # Czyścimy akordy z tego wiersza (tak samo jak listę filtrów)
-                row_accords_list = [acc.strip().strip("'\"").lower() for acc in row_accords_str.split(",")]
+                # OSTATECZNA LOGIKA: strip -> strip quotes -> strip AGAIN -> lower
+                row_accords_list = [acc.strip().strip("'\"").strip().lower() for acc in row_accords_str.split(",")]
                 
-                # Sprawdzamy, czy WSZYSTKIE wybrane akordy są na liście tego wiersza
                 for selected in selected_accords:
                     if selected not in row_accords_list:
-                        return False # Jeden z wymaganych akordów nie został znaleziony
-                return True # Wszystkie wymagane akordy tu są
+                        return False
+                return True 
 
             mask = filtered_df['main_accords'].apply(contains_all_accords)
             filtered_df = filtered_df[mask]
@@ -177,7 +159,7 @@ if df is not None:
             num_columns = 3
             cols = st.columns(num_columns)
             
-            for index, perfume in enumerate(filtered_df.it_tuples()):
+            for index, perfume in enumerate(filtered_df.itertuples()):
                 col_index = index % num_columns
                 with cols[col_index]:
                     display_perfume_card(perfume)
@@ -195,35 +177,4 @@ if df is not None:
             title="Histogram of all perfume ratings",
             labels={"score": "Rating (from 1 to 5)"}
         )
-        fig_hist.update_layout(bargap=0.1)
-        st.plotly_chart(fig_hist, use_container_width=True)
-
-        # Chart 2: Most popular accords (Bar chart)
-        st.subheader("Top 15 Most Common Scent Accords")
-        
-        # --- POPRAWKA 3: Używamy tej samej logiki czyszczenia dla wykresu ---
-        all_accords_flat_list = []
-        for accord_string in df['main_accords'].dropna():
-            accords = accord_string.split(",")
-            for accord in accords:
-                cleaned_accord = accord.strip().strip("'\"").lower()
-                if cleaned_accord:
-                    all_accords_flat_list.append(cleaned_accord)
-        
-        accords_counts = pd.Series(all_accords_flat_list).value_counts()
-        top_15_accords = accords_counts.head(15).sort_values(ascending=True)
-
-        fig_bar = px.bar(
-            top_15_accords,
-            # --- POPRAWKA BŁĘDU NameError ---
-            # Tutaj była literówka: 'top_1M_accords', teraz jest 'top_15_accords'
-            x=top_15_accords.values,
-            y=top_15_accords.index,
-            orientation='h',
-            title="Top 15 Accords in the database",
-            labels={"x": "Number of occurrences", "y": "Accord"}
-        )
-        st.plotly_chart(fig_bar, use_container_width=True)
-else:
-    st.header("Application could not be started.")
-    st.warning("Please resolve the data loading issue to continue.")
+        fig
