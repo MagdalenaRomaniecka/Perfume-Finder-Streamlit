@@ -35,11 +35,19 @@ def load_data(filepath):
         if df['score'].dtype == 'object':
             df['score'] = df['score'].str.replace(',', '.').astype(float)
         
-        # Extract unique accords
-        all_accords_str = ",".join(df['main_accords'].unique())
-        # Fix: convert all accords to lowercase
-        all_accords_list = [accord.strip().lower() for accord in all_accords_str.split(",")]
-        unique_accords = sorted(list(set(all_accords_list)))
+        # --- POPRAWKA 1: Solidne czyszczenie akordów ---
+        # Tworzymy płaską listę wszystkich akordów ze wszystkich wierszy
+        all_accords_flat_list = []
+        for accord_string in df['main_accords'].dropna():
+            accords = accord_string.split(",")
+            for accord in accords:
+                # Czyścimy spacje ORAZ cudzysłowy i zamieniamy na małe litery
+                cleaned_accord = accord.strip().strip("'\"").lower()
+                if cleaned_accord: # Unikamy dodawania pustych stringów
+                    all_accords_flat_list.append(cleaned_accord)
+        
+        # Tworzymy unikalną, posortowaną listę z czystych danych
+        unique_accords = sorted(list(set(all_accords_flat_list)))
         
         return df, unique_accords
         
@@ -138,18 +146,23 @@ if df is not None:
 
         # Filtering logic
         filtered_df = df[df['gender'] == selected_gender].copy()
-        filtered_df = filtered_df[filtered_df['score'] >= min_score]
+        filtered_df = filtered_df[filtered_score'] >= min_score]
 
         if selected_accords:
-            def contains_all_accords(row_accords):
-                if pd.isna(row_accords):
+            # --- POPRAWKA 2: Solidna logika filtrowania ---
+            def contains_all_accords(row_accords_str):
+                if pd.isna(row_accords_str):
                     return False
-                # Convert row accords to lower for comparison
-                row_accords_lower = row_accords.lower()
-                for accord in selected_accords:
-                    if accord not in row_accords_lower:
-                        return False
-                return True
+                
+                # Czyścimy akordy z tego wiersza (tak samo jak listę filtrów)
+                row_accords_list = [acc.strip().strip("'\"").lower() for acc in row_accords_str.split(",")]
+                
+                # Sprawdzamy, czy WSZYSTKIE wybrane akordy są na liście tego wiersza
+                for selected in selected_accords:
+                    if selected not in row_accords_list:
+                        return False # Jeden z wymaganych akordów nie został znaleziony
+                return True # Wszystkie wymagane akordy tu są
+
             mask = filtered_df['main_accords'].apply(contains_all_accords)
             filtered_df = filtered_df[mask]
 
@@ -187,10 +200,14 @@ if df is not None:
         # Chart 2: Most popular accords (Bar chart)
         st.subheader("Top 15 Most Common Scent Accords")
         
+        # --- POPRAWKA 3: Używamy tej samej logiki czyszczenia dla wykresu ---
         all_accords_flat_list = []
         for accord_string in df['main_accords'].dropna():
-            # Use .lower() to count "Vanilla" and "vanilla" as the same
-            all_accords_flat_list.extend([acc.strip().lower() for acc in accord_string.split(",")])
+            accords = accord_string.split(",")
+            for accord in accords:
+                cleaned_accord = accord.strip().strip("'\"").lower()
+                if cleaned_accord:
+                    all_accords_flat_list.append(cleaned_accord)
         
         accords_counts = pd.Series(all_accords_flat_list).value_counts()
         top_15_accords = accords_counts.head(15).sort_values(ascending=True)
