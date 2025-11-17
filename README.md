@@ -1,5 +1,7 @@
 # 🔎 Perfume Finder: Intelligent Fragrance Search Engine
+## 🚀 Live Demo
 
+[**Click here to see the live application!**](https://perfume-finder-app-btskyvq7eytc5ujrgzr2dk.streamlit.app/)
 ## Project Goal
 
 The **Perfume Finder** project is an interactive web application built using Streamlit and the Pandas library. Its purpose is to explore and filter a vast collection of perfumery data, enabling users to quickly find perfumes matched to their preferences based on main fragrance accords, gender, and rating score.
@@ -62,3 +64,4 @@ This project utilizes an open dataset created by Olga Gmiufana.
 * **Dataset:** Fragrantica.com Fragrance Dataset
 * **Author:** Olga Gmiufana
 * **Kaggle Source:** [https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset](https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset)
+
