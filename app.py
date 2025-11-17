@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# --- Konfiguracja strony ---
+# --- Page Configuration ---
 st.set_page_config(
     page_title="Perfume Finder 🔎",
     page_icon="👃",
@@ -10,57 +10,56 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Funkcje pomocnicze ---
+# --- Helper Functions ---
 
 @st.cache_data
 def load_data(filepath):
-    """Ładuje dane z pliku CSV i wstępnie je przetwarza."""
+    """Loads and preprocesses data from a CSV file."""
     try:
         df = pd.read_csv(filepath)
         
-        # --- POPRAWKA 1: DODAJEMY POPRAWNY BLOK RENAME ---
-        # Tłumaczymy nazwy z Twojego pliku CSV na te, których używa aplikacja
+        # --- FIX 1: ADDING THE CORRECT RENAME BLOCK ---
+        # Translate column names from your CSV file to the ones the app uses
         df.rename(columns={
             'Name': 'name',
             'Gender': 'gender',
             'Rating Value': 'score',
             'Rating Count': 'ratings',
             'Main Accords': 'main_accords',
-            'url': 'img_link'  # Zakładamy, że kolumna z linkiem do obrazka nazywa się 'url'
+            'url': 'img_link'  # Assuming the image link column is named 'url'
         }, inplace=True)
         
-        # Czystka danych: usuwanie wierszy bez kluczowych informacji
-        # Teraz te kolumny (po zmianie nazwy) zostaną znalezione
+        # Data cleaning: remove rows without key information
         df.dropna(subset=['main_accords', 'name', 'img_link'], inplace=True)
         
-        # Konwersja ocen na typ numeryczny (zastępowanie ',' na '.')
+        # Convert ratings to numeric type (replacing ',' with '.')
         if df['score'].dtype == 'object':
             df['score'] = df['score'].str.replace(',', '.').astype(float)
         
-        # Ekstrakcja unikalnych akordów
+        # Extract unique accords
         all_accords_str = ",".join(df['main_accords'].unique())
-        # Poprawka: zamieniamy wszystkie akordy na małe litery
+        # Fix: convert all accords to lowercase
         all_accords_list = [accord.strip().lower() for accord in all_accords_str.split(",")]
         unique_accords = sorted(list(set(all_accords_list)))
         
         return df, unique_accords
         
     except FileNotFoundError:
-        st.error(f"Błąd: Nie znaleziono pliku danych pod ścieżką: {filepath}.")
-        st.error("Upewnij się, że plik `fra_perfumes.csv` znajduje się w tym samym folderze co `app.py`.")
-        st.info("Pobierz plik z: https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset")
+        st.error(f"Error: Data file not found at path: {filepath}.")
+        st.error(f"Please make sure the `fra_perfumes.csv` file is in the same folder as `app.py`.")
+        st.info("Download the file from: https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset")
         return None, []
     except KeyError as e:
-        st.error(f"Błąd krytyczny: Nie znaleziono oczekiwanych kolumn w pliku CSV: {e}")
-        st.error("Sprawdź, czy Twój plik `fra_perfumes.csv` na pewno zawiera kolumny: 'Name', 'Gender', 'Rating Value', 'Rating Count', 'Main Accords', 'url'.")
-        st.info("Jeśli Twoje kolumny nazywają się inaczej, musimy zaktualizować blok `df.rename()` w kodzie.")
+        st.error(f"Critical Error: Expected columns not found in CSV file: {e}")
+        st.error("Please check if your `fra_perfumes.csv` file contains the columns: 'Name', 'Gender', 'Rating Value', 'Rating Count', 'Main Accords', 'url'.")
+        st.info("If your columns are named differently, we need to update the `df.rename()` block in the code.")
         return None, []
     except Exception as e:
-        st.error(f"Wystąpił nieoczekiwany błąd podczas ładowania danych: {e}")
+        st.error(f"An unexpected error occurred while loading data: {e}")
         return None, []
 
 def display_perfume_card(perfume):
-    """Wyświetla pojedynczą kartę perfum w galerii."""
+    """Displays a single perfume card in the gallery."""
     with st.container(border=True):
         col1, col2 = st.columns([1, 2])
         
@@ -73,54 +72,55 @@ def display_perfume_card(perfume):
         with col2:
             st.markdown(f"**{perfume['name']}**")
             
-            # --- POPRAWKA 2: USUWAMY LINIĘ Z 'brand' ---
-            # Twój plik CSV nie ma kolumny 'brand', więc ją usunęliśmy, aby uniknąć błędu
+            # --- FIX 2: REMOVED THE 'brand' LINE ---
+            # Your CSV file doesn't have a 'brand' column, so we removed it to avoid errors
             # st.markdown(f"*{perfume['brand']}*") 
             
-            score_str = f"{perfume['score']:.2f}".replace('.', ',')
-            st.metric(label="Ocena", value=score_str, delta=f"{perfume['ratings']} ocen")
+            score_str = f"{perfume['score']:.2f}"
+            st.metric(label="Rating", value=score_str, delta=f"{perfume['ratings']} ratings")
             
             if perfume['main_accords']:
                 accords_list = [f"`{acc.strip()}`" for acc in perfume['main_accords'].split(",")]
-                st.markdown("**Akordy:** " + " ".join(accords_list))
+                st.markdown("**Accords:** " + " ".join(accords_list))
 
-# --- Główna aplikacja ---
+# --- Main Application ---
 
-# Ładowanie danych
+# Load data
 df, unique_accords = load_data("fra_perfumes.csv")
 
-# Sprawdzenie, czy dane zostały pomyślnie załadowane
+# Check if data was loaded successfully
 if df is not None:
 
-    # --- Pasek boczny (Sidebar) ---
+    # --- Sidebar ---
     with st.sidebar:
         st.image("https://i.imgur.com/Kz81y1S.png", use_column_width=True)
-        st.title("Filtry Wyszukiwania")
+        st.title("Search Filters")
 
-        # --- NOWA POPRAWKA: Bezpieczne filtry domyślne ---
-        # Sprawdzamy, które z domyślnych wartości FAKTYCZNIE istnieją w danych
+        # --- NEW FIX: Safe default filters ---
+        # Check which of the default values ACTUALLY exist in the data
         desired_defaults = ["vanilla", "sweet", "powdery"]
-        # Używamy tylko tych, które istnieją, aby uniknąć błędu
+        # Use only those that exist to avoid errors
         actual_defaults = [d for d in desired_defaults if d in unique_accords]
 
-        # Filtr 1: Akordy zapachowe
+        # Filter 1: Scent Accords
         selected_accords = st.multiselect(
-            "Wybierz główne akordy:",
+            "Select main accords:",
             options=unique_accords,
-            default=actual_defaults  # Zmieniono, aby używać bezpiecznych filtrów
+            default=actual_defaults  # Changed to use safe defaults
         )
 
-        # Filtr 2: Płeć
-        gender_options = ["Damskie", "Męskie", "Unisex"]
+        # Filter 2: Gender
+        # The options MUST match the data in your 'Gender' column from the CSV
+        gender_options = ["Female", "Male", "Unisex"] 
         selected_gender = st.selectbox(
-            "Wybierz płeć:",
+            "Select gender:",
             options=gender_options,
-            index=0
+            index=0  # Defaults to 'Female'
         )
 
-        # Filtr 3: Minimalna ocena
+        # Filter 3: Minimum rating
         min_score = st.slider(
-            "Minimalna ocena (1.0 - 5.0):",
+            "Minimum rating (1.0 - 5.0):",
             min_value=1.0,
             max_value=5.0,
             value=4.0,
@@ -128,18 +128,18 @@ if df is not None:
         )
         
         st.markdown("---")
-        st.info("Projekt stworzony przez Magdalenę Romaniecką. Dane pochodzą z Kaggle.")
+        st.info("Project created by Magdalena Romaniecka. Data from Kaggle.")
 
-    # --- Główna zawartość strony ---
+    # --- Main Page Content ---
     
-    tab1, tab2 = st.tabs(["**🔎 Znajdź Perfumy**", "**📊 Statystyki Rynku**"])
+    tab1, tab2 = st.tabs(["**🔎 Find Perfumes**", "**📊 Market Statistics**"])
 
-    # --- Zakładka 1: Wyszukiwarka Perfum ---
+    # --- Tab 1: Perfume Finder ---
     with tab1:
-        st.title("Inteligentna Wyszukiwarka Perfum")
-        st.markdown("Użyj filtrów po lewej stronie, aby znaleźć zapach idealny dla siebie.")
+        st.title("Intelligent Perfume Finder")
+        st.markdown("Use the filters on the left to find your perfect scent.")
 
-        # Logika filtrowania
+        # Filtering logic
         filtered_df = df[df['gender'] == selected_gender].copy()
         filtered_df = filtered_df[filtered_df['score'] >= min_score]
 
@@ -147,7 +147,7 @@ if df is not None:
             def contains_all_accords(row_accords):
                 if pd.isna(row_accords):
                     return False
-                # Zamieniamy akordy wiersza na małe litery przed porównaniem
+                # Convert row accords to lower for comparison
                 row_accords_lower = row_accords.lower()
                 for accord in selected_accords:
                     if accord not in row_accords_lower:
@@ -156,12 +156,12 @@ if df is not None:
             mask = filtered_df['main_accords'].apply(contains_all_accords)
             filtered_df = filtered_df[mask]
 
-        # Wyświetlanie wyników
+        # Display results
         st.markdown("---")
-        st.subheader(f"Znaleziono {len(filtered_df)} perfum pasujących do Twoich kryteriów:")
+        st.subheader(f"Found {len(filtered_df)} perfumes matching your criteria:")
 
         if filtered_df.empty:
-            st.warning("Nie znaleziono żadnych perfum spełniających wszystkie kryteria. Spróbuj złagodzić filtry.")
+            st.warning("No perfumes found matching all criteria. Try relaxing your filters.")
         else:
             num_columns = 3
             cols = st.columns(num_columns)
@@ -171,28 +171,28 @@ if df is not None:
                 with cols[col_index]:
                     display_perfume_card(perfume)
 
-    # --- Zakładka 2: Statystyki Rynku ---
+    # --- Tab 2: Market Statistics ---
     with tab2:
-        st.title("Statystyki i Trendy Rynkowe")
+        st.title("Market Statistics & Trends")
 
-        # Wykres 1: Rozkład ocen (Histogram)
-        st.subheader("Jak rozkładają się oceny perfum?")
+        # Chart 1: Rating Distribution (Histogram)
+        st.subheader("How are perfume ratings distributed?")
         fig_hist = px.histogram(
             df, 
             x="score", 
             nbins=50, 
-            title="Histogram ocen wszystkich perfum",
-            labels={"score": "Ocena (od 1 do 5)"}
+            title="Histogram of all perfume ratings",
+            labels={"score": "Rating (from 1 to 5)"}
         )
         fig_hist.update_layout(bargap=0.1)
         st.plotly_chart(fig_hist, use_container_width=True)
 
-        # Wykres 2: Najpopularniejsze akordy (Bar chart)
-        st.subheader("15 najczęściej występujących akordów zapachowych")
+        # Chart 2: Most popular accords (Bar chart)
+        st.subheader("Top 15 Most Common Scent Accords")
         
         all_accords_flat_list = []
         for accord_string in df['main_accords'].dropna():
-            # Poprawka: Używamy .lower() aby zliczać "Vanilla" i "vanilla" jako to samo
+            # Fix: Use .lower() to count "Vanilla" and "vanilla" as the same
             all_accords_flat_list.extend([acc.strip().lower() for acc in accord_string.split(",")])
         
         accords_counts = pd.Series(all_accords_flat_list).value_counts()
@@ -203,10 +203,10 @@ if df is not None:
             x=top_15_accords.values,
             y=top_15_accords.index,
             orientation='h',
-            title="Top 15 Akordów w bazie danych",
-            labels={"x": "Liczba wystąpień", "y": "Akord"}
+            title="Top 15 Accords in the database",
+            labels={"x": "Number of occurrences", "y": "Accord"}
         )
         st.plotly_chart(fig_bar, use_container_width=True)
 else:
-    st.header("Aplikacja nie może zostać uruchomiona.")
-    st.warning("Proszę rozwiązać problem z ładowaniem danych, aby kontynuować.")
+    st.header("Application could not be started.")
+    st.warning("Please resolve the data loading issue to continue.")
