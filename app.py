@@ -217,7 +217,7 @@ if df is not None:
 
         fig_bar = px.bar(
             top_15_accords,
-            x=top_15_accords.values,
+            x=top_1M_accords.values,
             y=top_15_accords.index,
             orientation='h',
             title="Top 15 Accords in the database",
