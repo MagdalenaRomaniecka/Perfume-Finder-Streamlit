@@ -66,7 +66,7 @@ def load_custom_css():
 # --- Helper Functions ---
 
 @st.cache_data
-def load_data(filepath, cache_buster_v5): # Cache buster parameter
+def load_data(filepath, cache_buster_v6): # Cache buster parameter
     """Loads and preprocesses data from a CSV file."""
     try:
         df = pd.read_csv(filepath)
@@ -81,8 +81,17 @@ def load_data(filepath, cache_buster_v5): # Cache buster parameter
             'url': 'img_link'
         }, inplace=True)
         
+        # --- CRITICAL FIX ---
+        # Map the CSV gender data (e.g., "for women") to the app's categories (e.g., "Female")
+        gender_map = {
+            'for women': 'Female',
+            'for men': 'Male',
+            'for women and men': 'Unisex'
+        }
+        df['gender'] = df['gender'].map(gender_map)
+        
         # Data cleaning: remove rows without key information
-        df.dropna(subset=['main_accords', 'name', 'img_link'], inplace=True)
+        df.dropna(subset=['main_accords', 'name', 'img_link', 'gender'], inplace=True)
         
         # Convert ratings to numeric type (replacing ',' with '.')
         if df['score'].dtype == 'object':
@@ -91,12 +100,16 @@ def load_data(filepath, cache_buster_v5): # Cache buster parameter
         # Robust accord cleaning logic
         all_accords_flat_list = []
         for accord_string in df['main_accords'].dropna():
-            accords = accord_string.split(",")
-            for accord in accords:
-                # Final logic: strip -> strip quotes -> strip AGAIN -> lower
-                cleaned_accord = accord.strip().strip("'\"").strip().lower()
-                if cleaned_accord: 
-                    all_accords_flat_list.append(cleaned_accord)
+            # Accords are in "['citrus', 'musky', ...]" format
+            # We must strip brackets, quotes, and split
+            if isinstance(accord_string, str):
+                cleaned_string = accord_string.strip("[]") # Remove brackets
+                accords = cleaned_string.split(",")
+                for accord in accords:
+                    # FINAL LOGIC: strip -> strip quotes -> strip AGAIN -> lower
+                    cleaned_accord = accord.strip().strip("'\"").strip().lower()
+                    if cleaned_accord: 
+                        all_accords_flat_list.append(cleaned_accord)
         
         unique_accords = sorted(list(set(all_accords_flat_list)))
         
@@ -118,7 +131,7 @@ def display_perfume_card(perfume):
     """Displays a single perfume card in the gallery."""
     
     # We are using .itertuples() in the main loop,
-    # so we must use dot notation (perfume.name) instead of (perfume['name']).
+    # so we must use dot notation (perfume.name).
     
     with st.container(border=True):
         col1, col2 = st.columns([1, 2])
@@ -136,8 +149,20 @@ def display_perfume_card(perfume):
             st.metric(label="Rating", value=score_str, delta=f"{perfume.ratings} ratings")
             
             if perfume.main_accords:
-                accords_list = [f"`{acc.strip()}`" for acc in perfume.main_accords.split(",")]
-                st.markdown("**Accords:** " + " ".join(accords_list))
+                # Logic for accords stored as a string "['a','b']"
+                if isinstance(perfume.main_accords, str):
+                    cleaned_string = perfume.main_accords.strip("[]")
+                    accords_list_raw = cleaned_string.split(",")
+                else:
+                    accords_list_raw = [] # Fallback for unexpected data type
+
+                accords_list_clean = []
+                for acc in accords_list_raw:
+                    cleaned_accord = acc.strip().strip("'\"").strip()
+                    if cleaned_accord:
+                        accords_list_clean.append(f"`{cleaned_accord}`")
+                
+                st.markdown("**Accords:** " + " ".join(accords_list_clean))
 
 # --- Main Application ---
 
@@ -145,7 +170,7 @@ def display_perfume_card(perfume):
 load_custom_css()
 
 # Load the data (with cache buster)
-df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v5="v5")
+df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v6="v6") # v6 cache buster
 
 if df is not None:
     # --- Sidebar ---
@@ -156,10 +181,11 @@ if df is not None:
         selected_accords = st.multiselect(
             "Select main accords:",
             options=unique_accords,
-            default=[]  # Default to empty list
+            default=[]  # Default to empty list to show all results
         )
 
         # Filter 2: Gender
+        # These options now match our MAPPED data
         gender_options = ["Female", "Male", "Unisex"] 
         selected_gender = st.selectbox(
             "Select gender:",
@@ -197,13 +223,20 @@ if df is not None:
                 if pd.isna(row_accords_str):
                     return False
                 
-                # Final logic: strip -> strip quotes -> strip AGAIN -> lower
-                row_accords_list = [acc.strip().strip("'\"").strip().lower() for acc in row_accords_str.split(",")]
+                # FINAL LOGIC: strip -> strip quotes -> strip AGAIN -> lower
+                row_accords_list = []
+                cleaned_string = row_accords_str.strip("[]")
+                accords = cleaned_string.split(",")
+                for accord in accords:
+                    cleaned_accord = accord.strip().strip("'\"").strip().lower()
+                    if cleaned_accord:
+                        row_accords_list.append(cleaned_accord)
                 
+                # Check if all selected accords are in this row's list
                 for selected in selected_accords:
                     if selected not in row_accords_list:
                         return False
-                return True 
+                return True # Only returns True if all selected accords are found
 
             mask = filtered_df['main_accords'].apply(contains_all_accords)
             filtered_df = filtered_df[mask]
@@ -245,7 +278,8 @@ if df is not None:
         # Robust accord cleaning logic (for chart)
         all_accords_flat_list = []
         for accord_string in df['main_accords'].dropna():
-            accords = accord_string.split(",")
+            cleaned_string = accord_string.strip("[]")
+            accords = cleaned_string.split(",")
             for accord in accords:
                 # Final logic: strip -> strip quotes -> strip AGAIN -> lower
                 cleaned_accord = accord.strip().strip("'\"").strip().lower()
