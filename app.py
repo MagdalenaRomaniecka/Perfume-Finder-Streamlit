@@ -24,6 +24,7 @@ def load_custom_css():
         [data-testid="stAppViewContainer"] { background-color: #050505; }
         
         /* REMOVE HEADER & SIDEBAR COMPLETELY */
+        /* To ukrywa górny pasek i przycisk "keyboard" */
         [data-testid="stHeader"] { display: none; }
         [data-testid="stSidebarCollapsedControl"] { display: none !important; }
         section[data-testid="stSidebar"] { display: none; }
@@ -154,7 +155,7 @@ def load_custom_css():
 
 # --- Data Loading ---
 @st.cache_data
-def load_data(filepath, cache_buster_v21): # v21 Cache Buster
+def load_data(filepath, cache_buster_v22): # v22 Cache Buster
     try:
         df = pd.read_csv(filepath)
         # Rename
@@ -168,12 +169,4 @@ def load_data(filepath, cache_buster_v21): # v21 Cache Buster
             )
             
         # Map genders
-        gender_map = {'for women': 'Female', 'for men': 'Male', 'for women and men': 'Unisex'}
-        df['gender'] = df['gender'].map(gender_map)
-        
-        # Cleanup
-        df.dropna(subset=['main_accords', 'name', 'img_link', 'gender'], inplace=True)
-        
-        # Convert score
-        if df['score'].dtype == 'object':
-            df['score'] = df['score'].str.replace(',', '.').astype
+        gender_map = {'for women': '
