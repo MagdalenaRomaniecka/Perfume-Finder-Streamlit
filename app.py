@@ -150,7 +150,7 @@ def load_custom_css():
 
 # --- Data Loading ---
 @st.cache_data
-def load_data(filepath, cache_buster_v28): # v28 Final Cache Buster
+def load_data(filepath, cache_buster_v99): # v99 FORCE UPDATE
     try:
         df = pd.read_csv(filepath)
         # Rename
@@ -212,7 +212,7 @@ def render_minimal_card(perfume):
 
 # --- Main Logic ---
 load_custom_css()
-df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v28="v28")
+df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v99="v99")
 
 if df is not None:
     
@@ -264,4 +264,6 @@ if df is not None:
     st.markdown("<br><br><div style='text-align: center; color: #333; font-size: 10px;'>© 2024</div>", unsafe_allow_html=True)
 
 else:
-    st.error("System Error.")
+    st.error("Error loading data.")
+    
+# --- END OF FILE ---
