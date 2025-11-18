@@ -1,306 +1,228 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 
-# --- Page Configuration ---
-# Layout set to 'centered' for better mobile experience and blog-like feel
+# --- Konfiguracja Strony ---
 st.set_page_config(
-    page_title="Perfume Finder 🔎",
-    page_icon="👃",
-    layout="centered", # Better for mobile and luxury look
-    initial_sidebar_state="expanded" 
+    page_title="Perfume Finder",
+    page_icon="✨",
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-# --- Custom CSS Function ---
+# --- CSS dla Wersji Mobilnej (Bez Sidebaru, Bez Obrazków, Czysty Luksus) ---
 def load_custom_css():
-    """Injects custom CSS for luxury dark theme and fixes all aesthetic and UI issues."""
     st.markdown("""
         <style>
-        /* Import Google Fonts: Playfair Display (dla tytułów) i Montserrat (dla tekstu) */
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght=700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
 
-        /* Global font settings */
+        /* Ciemne tło aplikacji - Głęboka czerń */
         html, body, [class*="st-"], [class*="css-"] {
             font-family: 'Montserrat', sans-serif;
-            color: #FAFAFA; /* Light text for dark background */
+            color: #E0E0E0;
+            background-color: #0E0E0E; 
         }
+        [data-testid="stAppViewContainer"] { background-color: #0E0E0E; }
+        [data-testid="stHeader"] { background-color: #0E0E0E; }
 
-        /* Main App Background - Dark Onyx */
-        [data-testid="stAppViewContainer"] {
+        /* UKRYCIE PASKA BOCZNEGO (To naprawia problem "zlewającego się paska na górze") */
+        [data-testid="stSidebarCollapsedControl"] { display: none !important; }
+        section[data-testid="stSidebar"] { display: none; }
+
+        /* --- STYLIZACJA KART PERFUM (NOWA - BEZ ZDJĘĆ) --- */
+        /* Wygląd luksusowej wizytówki z tekstem */
+        .perfume-card {
             background-color: #1A1A1A;
-        }
-
-        /* CRITICAL FIX: Sidebar Background - Must be dark to match theme */
-        [data-testid="stSidebar"] {
-            background-color: #1A1A1A !important; 
-            border-right: 1px solid #333333;
-        }
-
-        /* KRYTYCZNA NAPRAWA: NAGŁÓWEK GŁÓWNY (USUWA BIAŁY PASEK NA GÓRZE) */
-        /* Ten selektor celuje w kontener nagłówka */
-        header {
-            background-color: #1A1A1A !important; /* Ustawia ciemne tło */
-            box-shadow: none !important; /* Usuwa wszelkie cienie, które go odcinają */
+            border-left: 4px solid #D4AF37; /* Złoty akcent zamiast zdjęcia */
+            border-radius: 0 8px 8px 0;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
         
-        /* FIX: Naprawia białe tło menu rozwijanego (np. po kliknięciu 'O nas') */
-        div[data-baseweb="popover"] {
-            background-color: #2A2A2A !important; 
-            border: 1px solid #444444 !important; 
-        }
-        
-        /* FIX: Kolor tekstu w menu rozwijanym */
-        div[data-baseweb="popover"] ul li {
-            color: #FAFAFA !important;
-            background-color: #2A2A2A !important;
-        }
-        
-        /* FIX: Rozwiązuje problem koloru w selektorach */
-        div[data-baseweb="select"] div[data-baseweb="input"] {
-            color: #FAFAFA !important;
-            background-color: #2A2A2A !important;
+        .perfume-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
         }
 
-
-        /* Card styles */
-        [data-testid="stVerticalBlockBorder"] {
-            background-color: #2A2A2A; 
-            border-radius: 12px;
-            border: 1px solid #3A3A3A; 
-            padding: 20px !important;
-        }
-        
-        /* Image and Metric styles */
-        .stImage img { border-radius: 8px; }
-        [data-testid="stMetric"] {
-            background-color: #333333; border-radius: 8px; padding: 10px; border: 1px solid #444444;
-        }
-
-        /* Typography - Luxury Font */
-        h1, h2, h3 {
+        .p-name {
             font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            color: #FFFFFF;
             font-weight: 700;
-            color: #FFFFFF; 
+            line-height: 1.2;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .p-rating {
+            font-size: 13px;
+            color: #0E0E0E; 
+            background-color: #D4AF37; /* Złote tło dla oceny */
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+
+        .p-notes {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .p-link {
+            display: block;
+            margin-top: 12px;
+            font-size: 11px;
+            color: #D4AF37;
+            text-decoration: none;
+            text-align: right;
+            font-weight: 600;
             letter-spacing: 0.5px;
         }
 
-        /* Gold links */
-        a {
-            color: #D4AF37 !important; 
-            text-decoration: none;
+        /* --- STYLIZACJA FILTRÓW (EXPANDER) --- */
+        /* Panel filtrów na głównej stronie */
+        .streamlit-expanderHeader {
+            background-color: #1A1A1A !important;
+            color: #D4AF37 !important;
+            font-family: 'Montserrat', sans-serif;
             font-weight: 600;
+            border: 1px solid #333;
+            border-radius: 8px;
         }
-        a:hover {
-            color: #F4CF57 !important; 
+        
+        /* Poprawa widoczności inputów (żeby tekst nie był niewidoczny) */
+        .stMultiSelect div[data-baseweb="select"] > div {
+            background-color: #252525;
+            border-color: #444;
+            color: white;
         }
-
-        /* Input Fixes - Ensures radio buttons and checkbox text are white */
-        .stMultiSelect, .stSelectbox, .stSlider {
-             color: white; 
+        
+        /* Kolor tekstu w liście rozwijanej */
+        div[role="listbox"] ul li {
+            color: white !important;
+            background-color: #252525 !important;
         }
         </style>
     """, unsafe_allow_html=True)
 
-# --- Helper Functions (No changes here) ---
+# --- Ładowanie Danych (Ze wszystkimi poprawkami) ---
 @st.cache_data
-def load_data(filepath, cache_buster_final): # v11 - New cache buster
-    """Loads, cleans, and preprocesses data from the CSV file."""
+def load_data(filepath, cache_buster_v13): # v13 Cache Buster
     try:
         df = pd.read_csv(filepath)
-        # ... (Data Cleaning and Mapping logic) ...
+        # Zmiana nazw kolumn
         df.rename(columns={'Name': 'name', 'Gender': 'gender', 'Rating Value': 'score', 'Rating Count': 'ratings', 'Main Accords': 'main_accords', 'url': 'img_link'}, inplace=True)
+        
+        # 1. NAPRAWA SKLEJONYCH NAZW (np. "9am Afnanfor women" -> "9am Afnan")
         if 'name' in df.columns and 'gender' in df.columns:
             df['name'] = df.apply(
                 lambda row: str(row['name']).replace(str(row['gender']), '').strip() 
-                if pd.notna(row['name']) and pd.notna(row['gender']) else row['name'], 
-                axis=1
+                if pd.notna(row['name']) and pd.notna(row['gender']) else row['name'], axis=1
             )
+            
+        # 2. MAPOWANIE PŁCI (naprawa braku wyników)
         gender_map = {'for women': 'Female', 'for men': 'Male', 'for women and men': 'Unisex'}
         df['gender'] = df['gender'].map(gender_map)
+        
+        # Czyszczenie pustych wierszy
         df.dropna(subset=['main_accords', 'name', 'img_link', 'gender'], inplace=True)
+        
+        # Konwersja oceny na liczbę
         if df['score'].dtype == 'object':
             df['score'] = df['score'].str.replace(',', '.').astype(float)
-        all_accords_flat_list = []
-        for accord_string in df['main_accords'].dropna():
-            if isinstance(accord_string, str):
-                cleaned_string = accord_string.strip("[]") 
-                accords = cleaned_string.split(",")
-                for accord in accords:
-                    cleaned_accord = accord.strip().strip("'\"").strip().lower()
-                    if cleaned_accord: 
-                        all_accords_flat_list.append(cleaned_accord)
-        unique_accords = sorted(list(set(all_accords_flat_list)))
-        return df, unique_accords
-    except FileNotFoundError:
-        st.error("Error: Data file not found. Please ensure `fra_perfumes.csv` is in the directory.")
-        return None, []
-    except KeyError as e:
-        st.error(f"Critical Error: Missing columns in CSV: {e}")
-        return None, []
-    except Exception as e:
-        st.error(f"An unexpected error occurred: {e}")
+            
+        # 3. CZYSZCZENIE NUT (naprawa podwójnych 'aldehydic')
+        all_accords = set()
+        for accords_str in df['main_accords'].dropna():
+            if isinstance(accords_str, str):
+                raw_list = accords_str.strip("[]").split(",")
+                for item in raw_list:
+                    clean_item = item.strip().strip("'\"").strip().lower()
+                    if clean_item: all_accords.add(clean_item)
+        
+        return df, sorted(list(all_accords))
+    except Exception:
         return None, []
 
-def display_perfume_card(perfume):
-    """Displays a single perfume card in the UI."""
-    with st.container(border=True):
-        col1, col2 = st.columns([1, 2])
-        with col1:
-            st.image("https://placehold.co/200x200/2A2A2A/666?text=Perfume", use_column_width=True) 
-            if perfume.img_link and isinstance(perfume.img_link, str):
-                st.markdown(f"<div style='text-align: center; margin-top: 10px;'><a href='{perfume.img_link}' target='_blank'>View on Fragrantica ↗</a></div>", unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"### {perfume.name}")
-            st.metric(label="Rating", value=f"{perfume.score:.2f}", delta=f"{perfume.ratings} votes")
-            if perfume.main_accords:
-                if isinstance(perfume.main_accords, str):
-                    cleaned_string = perfume.main_accords.strip("[]")
-                    accords_list_raw = cleaned_string.split(",")
-                else:
-                    accords_list_raw = []
-                accords_list_clean = []
-                for acc in accords_list_raw:
-                    cleaned_accord = acc.strip().strip("'\"").strip()
-                    if cleaned_accord:
-                        accords_list_clean.append(f"`{cleaned_accord}`")
-                st.markdown("**Notes:** " + " ".join(accords_list_clean[:5])) 
+def render_clean_card(perfume):
+    """Renderuje czystą kartę HTML bez obrazka, tylko elegancki tekst."""
+    
+    # Przygotowanie nut
+    notes_str = ""
+    if isinstance(perfume.main_accords, str):
+        raw = perfume.main_accords.strip("[]").split(",")
+        clean = [n.strip().strip("'\"").strip().lower() for n in raw[:5]] # Pokazujemy top 5 nut
+        notes_str = " • ".join(clean)
 
-# --- Main Application Logic ---
+    html = f"""
+    <a href="{perfume.img_link}" target="_blank" style="text-decoration: none;">
+        <div class="perfume-card">
+            <div class="perfume-header">
+                <div class="p-name">{perfume.name}</div>
+                <div class="p-rating">★ {perfume.score:.2f}</div>
+            </div>
+            <div class="p-notes">{notes_str}</div>
+            <div class="p-link">VIEW DETAILS ↗</div>
+        </div>
+    </a>
+    """
+    st.markdown(html, unsafe_allow_html=True)
 
-# 1. Load CSS
+# --- Główna Logika Aplikacji ---
 load_custom_css()
-
-# 2. Load Data 
-df, unique_accords = load_data("fra_perfumes.csv", cache_buster_final="v11")
+df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v13="v13")
 
 if df is not None:
+    # Nagłówek
+    st.markdown("<h1 style='text-align: center; font-family: Playfair Display; color: #D4AF37; margin-bottom: 5px;'>Perfume Finder</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #666; font-size: 12px; margin-top: 0;'>LUXURY DATABASE</p>", unsafe_allow_html=True)
     
-    # 3. FILTERS ARE MOVED TO SIDEBAR - NOW WITH RADIO AND CHECKBOXES
-    with st.sidebar:
-        st.header("Refine Your Search")
+    st.write("") # Odstęp
+    
+    # --- NOWOŚĆ: FILTRY NA GŁÓWNEJ STRONIE (EXPANDER) ---
+    # Zastępuje sidebar. Jest domyślnie rozwinięty.
+    with st.expander("🎛️ KLIKNIJ, ABY FILTROWAĆ / CLICK TO FILTER", expanded=True):
         
-        # Używamy Radio Buttons zamiast Selectbox - jest zawsze widoczne
-        gender_options = ["Female", "Male", "Unisex"] 
-        selected_gender = st.radio(
-            "Select Gender:",
-            options=gender_options,
-            index=0 
-        )
+        # Płeć (Przyciski poziome - łatwe na telefonie)
+        gender = st.radio("Płeć / Gender:", ["Female", "Male", "Unisex"], horizontal=True)
+        
+        # Ocena (Slider)
+        score = st.slider("Min. Ocena / Rating:", 1.0, 5.0, 4.0, 0.1)
+        
+        # Nuty (Multiselect)
+        notes = st.multiselect("Nuty zapachowe / Scent Notes:", unique_accords, placeholder="Wybierz (np. vanilla)...")
+        
+    # --- FILTROWANIE ---
+    filtered = df[df['gender'] == gender].copy()
+    filtered = filtered[filtered['score'] >= score]
+    
+    if notes:
+        def check_notes(row_str):
+            if pd.isna(row_str): return False
+            row_list = [n.strip().strip("'\"").strip().lower() for n in row_str.strip("[]").split(",")]
+            return all(note in row_list for note in notes)
+        filtered = filtered[filtered['main_accords'].apply(check_notes)]
 
-        min_score = st.slider(
-            "Minimum Rating:",
-            min_value=1.0,
-            max_value=5.0,
-            value=4.0,
-            step=0.1
-        )
-        
-        st.markdown("---")
-        st.subheader("Select Scent Notes:")
-        
-        # Używamy Checkboxów zamiast Multiselect (rozwiązuje problem jasnego menu)
-        selected_accords = []
-        
-        # Wyświetlamy akordy w 2 kolumnach dla lepszej estetyki sidebara
-        cols = st.columns(2)
-        for i, accord in enumerate(unique_accords):
-            if cols[i % 2].checkbox(accord):
-                selected_accords.append(accord)
-
-        st.markdown("---")
-        st.caption("Filters update results instantly.")
-    
-    
-    # 4. MAIN SCREEN CONTENT
-    st.header("Luxury Perfume Finder") # Używamy header, aby tytuł był mniejszy
-    st.markdown("Find your signature scent instantly.")
-    
+    # --- WYNIKI ---
     st.markdown("---")
-    
-    # --- Tab 1: Finder ---
-    tab1, tab2 = st.tabs(["**🔎 Perfume Finder**", "**📊 Market Analysis**"])
+    st.markdown(f"<div style='margin-bottom: 15px; color: #888; font-size: 13px; text-align: center;'>ZNALEZIONO / FOUND: {len(filtered)}</div>", unsafe_allow_html=True)
 
-    with tab1:
-        # Filtering Logic (Uses variables defined in st.sidebar)
-        filtered_df = df[df['gender'] == selected_gender].copy()
-        filtered_df = filtered_df[filtered_df['score'] >= min_score]
+    if filtered.empty:
+        st.info("Brak wyników dla tych kryteriów. Spróbuj zmienić filtry.")
+    else:
+        # Wyświetlamy czyste karty (limit 50 dla szybkości)
+        for row in filtered.head(50).itertuples():
+            render_clean_card(row)
+            
+    st.markdown("<br><br><div style='text-align: center; color: #444; font-size: 10px;'>© 2024 Magdalena Romaniecka</div>", unsafe_allow_html=True)
 
-        if selected_accords:
-            def contains_all_accords(row_accords_str):
-                # ... (Filtering logic remains the same) ...
-                if pd.isna(row_accords_str): return False
-                
-                row_accords_list = []
-                cleaned_string = row_accords_str.strip("[]")
-                accords = cleaned_string.split(",")
-                for accord in accords:
-                    cleaned_accord = accord.strip().strip("'\"").strip().lower()
-                    if cleaned_accord:
-                        row_accords_list.append(cleaned_accord)
-                
-                for selected in selected_accords:
-                    if selected not in row_accords_list: return False
-                return True 
-
-            mask = filtered_df['main_accords'].apply(contains_all_accords)
-            filtered_df = filtered_df[mask]
-
-        # Results
-        st.subheader(f"Found {len(filtered_df)} exclusive matches:")
-
-        if filtered_df.empty:
-            st.info("No perfumes found matching these exact criteria. Try removing some note filters.")
-        else:
-            for index, perfume in enumerate(filtered_df.itertuples()):
-                display_perfume_card(perfume)
-
-    # --- Tab 2: Statistics ---
-    with tab2:
-        # ... (Charts logic remains the same) ...
-        st.title("Market Insights")
-        st.markdown("Analysis of trends across the database.")
-
-        # Chart 1
-        st.markdown("### Rating Distribution")
-        fig_hist = px.histogram(
-            df, x="score", nbins=50, 
-            title="",
-            labels={"score": "Rating"},
-            template="plotly_dark", 
-            color_discrete_sequence=['#D4AF37'] 
-        )
-        fig_hist.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig_hist, use_container_width=True)
-
-        # Chart 2
-        st.markdown("### Top 15 Scent Notes")
-        
-        all_accords_flat_list = []
-        for accord_string in df['main_accords'].dropna():
-            cleaned_string = accord_string.strip("[]")
-            accords = cleaned_string.split(",")
-            for accord in accords:
-                cleaned_accord = accord.strip().strip("'\"").strip().lower()
-                if cleaned_accord:
-                    all_accords_flat_list.append(cleaned_accord)
-        
-        accords_counts = pd.Series(all_accords_flat_list).value_counts()
-        top_15_accords = accords_counts.head(15).sort_values(ascending=True)
-
-        fig_bar = px.bar(
-            top_15_accords,
-            x=top_15_accords.values,
-            y=top_15_accords.index,
-            orientation='h',
-            title="",
-            labels={"x": "Count", "y": "Note"},
-            template="plotly_dark",
-            color_discrete_sequence=['#D4AF37'] 
-        )
-        fig_bar.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig_bar, use_container_width=True)
-
-    st.markdown("---")
-    st.caption("© 2024 Magdalena Romaniecka. Code built with Streamlit.")
 else:
-    st.error("Application failed to load data.")
+    st.error("Błąd: Nie udało się załadować danych.")
