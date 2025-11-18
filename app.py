@@ -37,19 +37,22 @@ def load_custom_css():
         }
 
         /* KRYTYCZNA NAPRAWA: ROZWIJANE MENU I LISTY (DROPDOWNS/MULTSELECTS) */
+        /* Ten selektor jest kluczowy - nadpisuje tło menu */
         div[data-baseweb="popover"] {
-            /* Tło całego menu pop-up */
             background-color: #2A2A2A !important; 
             border: 1px solid #444444 !important; 
         }
+        
+        /* Ten selektor jest kluczowy - nadpisuje elementy listy */
         div[data-baseweb="popover"] ul li {
-            /* Styl dla pojedynczych elementów listy */
             color: #FAFAFA !important; /* Tekst musi być biały */
             background-color: #2A2A2A !important;
         }
-        div[data-baseweb="popover"] ul li:hover {
-            /* Efekt najechania myszką (hover) */
-            background-color: #3A3A3A !important;
+        
+        /* To nadpisuje zaznaczone/wybrane elementy w menu */
+        div[data-baseweb="select"] div[data-baseweb="input"] {
+            color: #FAFAFA !important;
+            background-color: #2A2A2A !important;
         }
 
 
