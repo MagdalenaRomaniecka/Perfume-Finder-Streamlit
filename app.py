@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- CSS: Mobile-First, High Contrast & Framed Headers ---
+# --- CSS: Full Screen Mode & Luxury Design ---
 def load_custom_css():
     st.markdown("""
         <style>
@@ -22,26 +22,35 @@ def load_custom_css():
             background-color: #050505; /* Deepest Black */
         }
         [data-testid="stAppViewContainer"] { background-color: #050505; }
-        [data-testid="stHeader"] { background-color: #050505; }
+        
+        /* --- CRITICAL FIX: HIDE TOP HEADER BAR --- */
+        /* This removes the 'Keyboard'/'Menu' bar completely for a clean look */
+        [data-testid="stHeader"] {
+            display: none;
+        }
+        /* Move content up since header is gone */
+        .block-container {
+            padding-top: 2rem !important;
+        }
 
-        /* HIDE SIDEBAR ELEMENTS */
+        /* HIDE SIDEBAR ELEMENTS COMPLETELY */
         [data-testid="stSidebarCollapsedControl"] { display: none !important; }
         section[data-testid="stSidebar"] { display: none; }
 
         /* --- AESTHETIC FRAMED HEADER --- */
         .luxury-frame {
             border: 2px solid #D4AF37; /* Gold Border */
-            padding: 30px;
-            border-radius: 0px; /* Sharp, elegant corners */
+            padding: 20px;
+            border-radius: 0px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             background-color: #111;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1); /* Subtle gold glow */
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
         }
         
         .luxury-title {
             font-family: 'Playfair Display', serif;
-            font-size: 42px !important; /* Much larger title */
+            font-size: 32px !important; /* Optimized for mobile */
             color: #D4AF37; /* Gold */
             font-weight: 700;
             margin: 0;
@@ -52,99 +61,95 @@ def load_custom_css():
 
         .luxury-subtitle {
             font-family: 'Montserrat', sans-serif;
-            font-size: 14px;
+            font-size: 12px;
             color: #FFFFFF;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
-        /* --- VISIBILITY FIXES FOR INPUTS (CRITICAL) --- */
+        /* --- INPUT VISIBILITY FIXES --- */
         
-        /* 1. Radio Buttons (Gender) */
+        /* Radio Buttons (Gender) */
         div[role="radiogroup"] label {
             background-color: #1A1A1A !important;
             border: 1px solid #333 !important;
-            padding: 10px 15px !important;
-            border-radius: 5px !important;
-            margin-right: 10px !important;
-            transition: all 0.3s ease;
+            padding: 8px 12px !important;
+            border-radius: 4px !important;
+            margin-right: 5px !important;
         }
-        /* Force text color inside radio buttons to be WHITE */
         div[role="radiogroup"] label p {
             color: #FFFFFF !important; 
             font-weight: 600 !important;
-            font-size: 16px !important;
-        }
-        /* Hover effect */
-        div[role="radiogroup"] label:hover {
-            border-color: #D4AF37 !important;
+            font-size: 14px !important;
         }
 
-        /* 2. Slider (Rating) */
-        /* The label above the slider */
+        /* Slider (Rating) */
         div[data-testid="stSlider"] label p {
-            color: #D4AF37 !important; /* Gold Label */
-            font-size: 16px !important;
+            color: #D4AF37 !important; 
+            font-size: 14px !important;
             font-weight: 600 !important;
         }
-        /* The numbers on the slider */
         div[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p {
             color: #FFFFFF !important;
         }
 
-        /* 3. Multiselect (Notes) */
+        /* Multiselect (Notes) */
         .stMultiSelect label p {
-            color: #D4AF37 !important; /* Gold Label */
-            font-size: 16px !important;
+            color: #D4AF37 !important;
+            font-size: 14px !important;
             font-weight: 600 !important;
         }
-        /* The selected items (tags) */
         .stMultiSelect span[data-baseweb="tag"] {
             background-color: #D4AF37 !important;
             color: black !important;
+        }
+        div[role="listbox"] ul li {
+            color: white !important;
+            background-color: #252525 !important;
         }
         
         /* --- PERFUME CARD STYLING --- */
         .perfume-card {
             background-color: #121212;
             border: 1px solid #333;
-            border-left: 5px solid #D4AF37; /* Thicker gold accent */
-            padding: 20px;
-            margin-bottom: 20px;
+            border-left: 4px solid #D4AF37; 
+            padding: 15px;
+            margin-bottom: 15px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
         
         .p-name {
             font-family: 'Playfair Display', serif;
-            font-size: 22px; /* Larger Name */
+            font-size: 20px; 
             color: #FFFFFF;
             font-weight: 700;
             margin-bottom: 5px;
+            line-height: 1.2;
         }
 
         .p-rating {
-            font-size: 14px;
+            font-size: 13px;
             color: #D4AF37; 
             font-weight: 700;
             letter-spacing: 0.5px;
         }
 
         .p-notes {
-            font-size: 12px;
+            font-size: 11px;
             color: #AAAAAA;
             font-style: italic;
-            margin-top: 8px;
-            line-height: 1.5;
+            margin-top: 6px;
+            line-height: 1.4;
         }
 
         .p-link {
             display: inline-block;
-            margin-top: 15px;
-            font-size: 11px;
+            margin-top: 12px;
+            font-size: 10px;
             color: #000;
-            background-color: #D4AF37; /* Gold Button */
-            padding: 8px 16px;
+            background-color: #D4AF37; 
+            padding: 6px 12px;
             text-decoration: none;
             font-weight: 700;
             letter-spacing: 1px;
@@ -153,18 +158,19 @@ def load_custom_css():
         
         /* Expander Styling */
         .streamlit-expanderHeader {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
             color: #FFFFFF !important;
             background-color: #1A1A1A !important;
             border: 1px solid #D4AF37 !important;
+            font-weight: 600;
         }
         </style>
     """, unsafe_allow_html=True)
 
 # --- Data Loading ---
 @st.cache_data
-def load_data(filepath, cache_buster_v16): # v16 Cache Buster
+def load_data(filepath, cache_buster_v19): # v19 Cache Buster
     try:
         df = pd.read_csv(filepath)
         # Column renaming
@@ -215,46 +221,50 @@ def render_luxury_card(perfume):
         <div class="p-name">{perfume.name}</div>
         <div class="p-rating">★ {perfume.score:.2f} / 5.0</div>
         <div class="p-notes">{notes_str}</div>
-        <a href="{perfume.img_link}" target="_blank" class="p-link">VIEW DETAILS</a>
+        <a href="{perfume.img_link}" target="_blank" class="p-link">DETAILS ↗</a>
     </div>
     """
     st.markdown(html, unsafe_allow_html=True)
 
 # --- Main Logic ---
 load_custom_css()
-df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v16="v16")
+df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v19="v19")
 
 if df is not None:
     
-    # --- FRAMED HEADER ---
+    # --- FRAMED HEADER (Pure HTML) ---
     st.markdown("""
         <div class="luxury-frame">
             <h1 class="luxury-title">Perfume Finder</h1>
-            <div class="luxury-subtitle">Exclusive Fragrance Database</div>
+            <div class="luxury-subtitle">Luxury Database</div>
         </div>
     """, unsafe_allow_html=True)
     
-    # --- FILTERS ---
-    with st.expander("▼  FILTER SEARCH  ▼", expanded=True):
+    # --- FILTERS (Shortened Labels to prevent wrapping) ---
+    with st.expander("▼ FILTERS ▼", expanded=True):
         
         st.write("")
-        # Gender (Radio)
-        gender = st.radio("SELECT GENDER", ["Female", "Male", "Unisex"], horizontal=True)
+        # Gender (Radio with All option)
+        gender = st.radio("GENDER", ["All", "Female", "Male", "Unisex"], horizontal=True)
         
         st.write("")
         st.markdown("<hr style='border-color: #333; margin: 10px 0;'>", unsafe_allow_html=True)
         
-        # Score (Slider)
-        score = st.slider("MINIMUM RATING", 1.0, 5.0, 4.0, 0.1)
+        # Score
+        score = st.slider("MIN RATING", 1.0, 5.0, 4.0, 0.1)
         
         st.write("")
         st.markdown("<hr style='border-color: #333; margin: 10px 0;'>", unsafe_allow_html=True)
 
-        # Notes (Multiselect)
-        notes = st.multiselect("SCENT NOTES", unique_accords, placeholder="Search ingredients...")
+        # Notes
+        notes = st.multiselect("NOTES", unique_accords, placeholder="e.g. rose...")
         
     # --- FILTERING LOGIC ---
-    filtered = df[df['gender'] == gender].copy()
+    if gender == "All":
+        filtered = df.copy()
+    else:
+        filtered = df[df['gender'] == gender].copy()
+
     filtered = filtered[filtered['score'] >= score]
     
     if notes:
@@ -266,10 +276,10 @@ if df is not None:
 
     # --- RESULTS DISPLAY ---
     st.markdown("---")
-    st.markdown(f"<div style='text-align: center; color: #D4AF37; letter-spacing: 2px; margin-bottom: 20px; font-size: 14px;'>FOUND {len(filtered)} MATCHES</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align: center; color: #D4AF37; letter-spacing: 2px; margin-bottom: 20px; font-size: 12px;'>FOUND {len(filtered)} MATCHES</div>", unsafe_allow_html=True)
 
     if filtered.empty:
-        st.info("No perfumes found. Try adjusting your filters.")
+        st.info("No perfumes found.")
     else:
         for row in filtered.head(50).itertuples():
             render_luxury_card(row)
@@ -277,4 +287,4 @@ if df is not None:
     st.markdown("<br><br><div style='text-align: center; color: #444; font-size: 10px;'>© 2024 Portfolio Project</div>", unsafe_allow_html=True)
 
 else:
-    st.error("System Error: Data could not be loaded.")
+    st.error("System Error.")
