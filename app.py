@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- CSS: Full Screen Mode & Luxury Design ---
+# --- CSS: Mobile-First, High Contrast, No Sidebar ---
 def load_custom_css():
     st.markdown("""
         <style>
@@ -23,157 +23,141 @@ def load_custom_css():
         }
         [data-testid="stAppViewContainer"] { background-color: #050505; }
         
-        /* --- CRITICAL FIX: HIDE TOP HEADER BAR --- */
-        /* This removes the 'Keyboard'/'Menu' bar completely for a clean look */
-        [data-testid="stHeader"] {
-            display: none;
-        }
-        /* Move content up since header is gone */
-        .block-container {
-            padding-top: 2rem !important;
-        }
-
-        /* HIDE SIDEBAR ELEMENTS COMPLETELY */
+        /* REMOVE HEADER & SIDEBAR COMPLETELY */
+        [data-testid="stHeader"] { display: none; }
         [data-testid="stSidebarCollapsedControl"] { display: none !important; }
         section[data-testid="stSidebar"] { display: none; }
-
-        /* --- AESTHETIC FRAMED HEADER --- */
-        .luxury-frame {
-            border: 2px solid #D4AF37; /* Gold Border */
-            padding: 20px;
-            border-radius: 0px;
-            text-align: center;
-            margin-bottom: 20px;
-            background-color: #111;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
-        }
         
-        .luxury-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 32px !important; /* Optimized for mobile */
-            color: #D4AF37; /* Gold */
-            font-weight: 700;
-            margin: 0;
-            line-height: 1.2;
+        /* Adjust top padding since header is gone */
+        .block-container { padding-top: 2rem !important; }
+
+        /* --- HIGH CONTRAST INPUTS (FIXING READABILITY) --- */
+        
+        /* 1. Widget Labels (Titles like "Gender") */
+        label p {
+            color: #D4AF37 !important; /* Gold */
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase;
             letter-spacing: 1px;
-            text-transform: uppercase;
         }
 
-        .luxury-subtitle {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 12px;
-            color: #FFFFFF;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-top: 5px;
+        /* 2. Radio Buttons (Gender) - CRITICAL FIX FOR DOT VISIBILITY */
+        div[role="radiogroup"] label div[data-testid="stMarkdownContainer"] p {
+            color: #FFFFFF !important; /* Bright White Text */
+            font-weight: 500 !important;
         }
-
-        /* --- INPUT VISIBILITY FIXES --- */
+        /* Force the outer ring to be Gold */
+        div[role="radiogroup"] div[data-baseweb="radio"] div {
+            border-color: #D4AF37 !important;
+        }
+        /* Force the inner filled dot to be Gold when checked */
+        div[role="radiogroup"] [aria-checked="true"] div[data-baseweb="radio"] div {
+            background-color: #D4AF37 !important;
+        }
         
-        /* Radio Buttons (Gender) */
-        div[role="radiogroup"] label {
-            background-color: #1A1A1A !important;
-            border: 1px solid #333 !important;
-            padding: 8px 12px !important;
-            border-radius: 4px !important;
-            margin-right: 5px !important;
-        }
-        div[role="radiogroup"] label p {
-            color: #FFFFFF !important; 
+        /* 3. Slider (Rating) */
+        div[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p {
+            color: #FFFFFF !important; /* Bright White Numbers */
             font-weight: 600 !important;
-            font-size: 14px !important;
+        }
+        /* Slider Track */
+        div[data-testid="stSlider"] div[data-baseweb="slider"] div {
+            background-color: #D4AF37 !important;
         }
 
-        /* Slider (Rating) */
-        div[data-testid="stSlider"] label p {
-            color: #D4AF37 !important; 
-            font-size: 14px !important;
-            font-weight: 600 !important;
-        }
-        div[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p {
+        /* 4. Multiselect (Notes) */
+        .stMultiSelect div[data-baseweb="select"] span {
             color: #FFFFFF !important;
         }
-
-        /* Multiselect (Notes) */
-        .stMultiSelect label p {
-            color: #D4AF37 !important;
-            font-size: 14px !important;
-            font-weight: 600 !important;
+        /* Dropdown options background */
+        div[role="listbox"] ul {
+            background-color: #1A1A1A !important;
         }
-        .stMultiSelect span[data-baseweb="tag"] {
-            background-color: #D4AF37 !important;
-            color: black !important;
-        }
-        div[role="listbox"] ul li {
+        div[role="listbox"] li {
             color: white !important;
-            background-color: #252525 !important;
+            background-color: #1A1A1A !important;
+        }
+
+        /* --- EXPANDER STYLING (Clean Dark Box) --- */
+        .streamlit-expanderHeader {
+            background-color: #111111 !important;
+            border: 1px solid #333 !important;
+            color: #D4AF37 !important;
+            font-family: 'Montserrat', sans-serif;
+            border-radius: 5px;
         }
         
-        /* --- PERFUME CARD STYLING --- */
+        /* --- PERFUME CARD STYLING (Text Only, Clean) --- */
         .perfume-card {
             background-color: #121212;
-            border: 1px solid #333;
-            border-left: 4px solid #D4AF37; 
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+            padding: 20px 0; /* Vertical padding only */
+            margin-bottom: 0;
         }
         
         .p-name {
             font-family: 'Playfair Display', serif;
-            font-size: 20px; 
+            font-size: 18px; /* Standard readable size */
             color: #FFFFFF;
-            font-weight: 700;
+            font-weight: 600;
             margin-bottom: 5px;
             line-height: 1.2;
         }
 
         .p-rating {
-            font-size: 13px;
+            font-size: 12px;
             color: #D4AF37; 
             font-weight: 700;
             letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         .p-notes {
             font-size: 11px;
-            color: #AAAAAA;
-            font-style: italic;
+            color: #888888;
             margin-top: 6px;
             line-height: 1.4;
         }
 
         .p-link {
-            display: inline-block;
-            margin-top: 12px;
             font-size: 10px;
-            color: #000;
-            background-color: #D4AF37; 
-            padding: 6px 12px;
+            color: #555;
             text-decoration: none;
-            font-weight: 700;
-            letter-spacing: 1px;
-            border-radius: 2px;
+            margin-left: 10px;
+            border: 1px solid #333;
+            padding: 2px 6px;
+            border-radius: 4px;
         }
-        
-        /* Expander Styling */
-        .streamlit-expanderHeader {
+
+        /* --- HEADER TYPOGRAPHY (Smaller) --- */
+        .main-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px; /* Reduced from 42px */
+            color: #D4AF37;
+            text-align: center;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        .sub-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 14px;
-            color: #FFFFFF !important;
-            background-color: #1A1A1A !important;
-            border: 1px solid #D4AF37 !important;
-            font-weight: 600;
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
         }
         </style>
     """, unsafe_allow_html=True)
 
 # --- Data Loading ---
 @st.cache_data
-def load_data(filepath, cache_buster_v19): # v19 Cache Buster
+def load_data(filepath, cache_buster_v21): # v21 Cache Buster
     try:
         df = pd.read_csv(filepath)
-        # Column renaming
+        # Rename
         df.rename(columns={'Name': 'name', 'Gender': 'gender', 'Rating Value': 'score', 'Rating Count': 'ratings', 'Main Accords': 'main_accords', 'url': 'img_link'}, inplace=True)
         
         # Fix glued names
@@ -192,99 +176,4 @@ def load_data(filepath, cache_buster_v19): # v19 Cache Buster
         
         # Convert score
         if df['score'].dtype == 'object':
-            df['score'] = df['score'].str.replace(',', '.').astype(float)
-            
-        # Extract unique accords
-        all_accords = set()
-        for accords_str in df['main_accords'].dropna():
-            if isinstance(accords_str, str):
-                raw_list = accords_str.strip("[]").split(",")
-                for item in raw_list:
-                    clean_item = item.strip().strip("'\"").strip().lower()
-                    if clean_item: all_accords.add(clean_item)
-        
-        return df, sorted(list(all_accords))
-    except Exception:
-        return None, []
-
-def render_luxury_card(perfume):
-    """Renders a high-end, text-focused perfume card."""
-    
-    notes_str = ""
-    if isinstance(perfume.main_accords, str):
-        raw = perfume.main_accords.strip("[]").split(",")
-        clean = [n.strip().strip("'\"").strip().lower() for n in raw[:5]] 
-        notes_str = " • ".join(clean)
-
-    html = f"""
-    <div class="perfume-card">
-        <div class="p-name">{perfume.name}</div>
-        <div class="p-rating">★ {perfume.score:.2f} / 5.0</div>
-        <div class="p-notes">{notes_str}</div>
-        <a href="{perfume.img_link}" target="_blank" class="p-link">DETAILS ↗</a>
-    </div>
-    """
-    st.markdown(html, unsafe_allow_html=True)
-
-# --- Main Logic ---
-load_custom_css()
-df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v19="v19")
-
-if df is not None:
-    
-    # --- FRAMED HEADER (Pure HTML) ---
-    st.markdown("""
-        <div class="luxury-frame">
-            <h1 class="luxury-title">Perfume Finder</h1>
-            <div class="luxury-subtitle">Luxury Database</div>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # --- FILTERS (Shortened Labels to prevent wrapping) ---
-    with st.expander("▼ FILTERS ▼", expanded=True):
-        
-        st.write("")
-        # Gender (Radio with All option)
-        gender = st.radio("GENDER", ["All", "Female", "Male", "Unisex"], horizontal=True)
-        
-        st.write("")
-        st.markdown("<hr style='border-color: #333; margin: 10px 0;'>", unsafe_allow_html=True)
-        
-        # Score
-        score = st.slider("MIN RATING", 1.0, 5.0, 4.0, 0.1)
-        
-        st.write("")
-        st.markdown("<hr style='border-color: #333; margin: 10px 0;'>", unsafe_allow_html=True)
-
-        # Notes
-        notes = st.multiselect("NOTES", unique_accords, placeholder="e.g. rose...")
-        
-    # --- FILTERING LOGIC ---
-    if gender == "All":
-        filtered = df.copy()
-    else:
-        filtered = df[df['gender'] == gender].copy()
-
-    filtered = filtered[filtered['score'] >= score]
-    
-    if notes:
-        def check_notes(row_str):
-            if pd.isna(row_str): return False
-            row_list = [n.strip().strip("'\"").strip().lower() for n in row_str.strip("[]").split(",")]
-            return all(note in row_list for note in notes)
-        filtered = filtered[filtered['main_accords'].apply(check_notes)]
-
-    # --- RESULTS DISPLAY ---
-    st.markdown("---")
-    st.markdown(f"<div style='text-align: center; color: #D4AF37; letter-spacing: 2px; margin-bottom: 20px; font-size: 12px;'>FOUND {len(filtered)} MATCHES</div>", unsafe_allow_html=True)
-
-    if filtered.empty:
-        st.info("No perfumes found.")
-    else:
-        for row in filtered.head(50).itertuples():
-            render_luxury_card(row)
-            
-    st.markdown("<br><br><div style='text-align: center; color: #444; font-size: 10px;'>© 2024 Portfolio Project</div>", unsafe_allow_html=True)
-
-else:
-    st.error("System Error.")
+            df['score'] = df['score'].str.replace(',', '.').astype
