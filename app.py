@@ -36,6 +36,32 @@ def load_custom_css():
             border-right: 1px solid #333333;
         }
 
+        /* KRYTYCZNA NAPRAWA: NAGŁÓWEK GŁÓWNY (USUWA BIAŁY PASEK NA GÓRZE) */
+        /* Ten selektor celuje w kontener nagłówka */
+        header {
+            background-color: #1A1A1A !important; /* Ustawia ciemne tło */
+            box-shadow: none !important; /* Usuwa wszelkie cienie, które go odcinają */
+        }
+        
+        /* FIX: Naprawia białe tło menu rozwijanego (np. po kliknięciu 'O nas') */
+        div[data-baseweb="popover"] {
+            background-color: #2A2A2A !important; 
+            border: 1px solid #444444 !important; 
+        }
+        
+        /* FIX: Kolor tekstu w menu rozwijanym */
+        div[data-baseweb="popover"] ul li {
+            color: #FAFAFA !important;
+            background-color: #2A2A2A !important;
+        }
+        
+        /* FIX: Rozwiązuje problem koloru w selektorach */
+        div[data-baseweb="select"] div[data-baseweb="input"] {
+            color: #FAFAFA !important;
+            background-color: #2A2A2A !important;
+        }
+
+
         /* Card styles */
         [data-testid="stVerticalBlockBorder"] {
             background-color: #2A2A2A; 
