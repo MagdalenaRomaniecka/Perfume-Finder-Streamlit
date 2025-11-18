@@ -3,7 +3,7 @@ import pandas as pd
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="Perfume Finder",
+    page_title="Perfume Finder 2.0",
     page_icon="✨",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -24,6 +24,7 @@ def load_custom_css():
         [data-testid="stAppViewContainer"] { background-color: #050505; }
         
         /* REMOVE HEADER & SIDEBAR COMPLETELY */
+        header { visibility: hidden; }
         [data-testid="stHeader"] { display: none; }
         [data-testid="stSidebarCollapsedControl"] { display: none !important; }
         section[data-testid="stSidebar"] { display: none; }
@@ -36,7 +37,7 @@ def load_custom_css():
         /* 1. Widget Labels */
         label p {
             color: #D4AF37 !important; /* Gold */
-            font-size: 14px !important;
+            font-size: 13px !important;
             font-weight: 600 !important;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -150,7 +151,7 @@ def load_custom_css():
 
 # --- Data Loading ---
 @st.cache_data
-def load_data(filepath, cache_buster_v99): # v99 FORCE UPDATE
+def load_data(filepath, cache_buster_v100): # v100 FORCE UPDATE
     try:
         df = pd.read_csv(filepath)
         # Rename
@@ -212,13 +213,13 @@ def render_minimal_card(perfume):
 
 # --- Main Logic ---
 load_custom_css()
-df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v99="v99")
+df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v100="v100")
 
 if df is not None:
     
     # --- HEADER ---
-    st.markdown('<div class="main-title">Perfume Finder</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">Curated Database</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">PERFUME FINDER 2.0</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">LUXURY DATABASE</div>', unsafe_allow_html=True)
     
     # --- FILTERS ---
     with st.expander("⚡ FILTER SETTINGS", expanded=True):
@@ -265,5 +266,3 @@ if df is not None:
 
 else:
     st.error("Error loading data.")
-    
-# --- END OF FILE ---
