@@ -8,21 +8,21 @@ st.set_page_config(
     page_title="Perfume Finder 🔎",
     page_icon="👃",
     layout="centered",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed" # Zmieniono na 'collapsed', bo filtry są w środku!
 )
 
 # --- Custom CSS Function ---
 def load_custom_css():
-    """Injects custom CSS for a high-end, dark luxury aesthetic."""
+    """Wstrzykuje niestandardowy CSS dla luksusowego ciemnego motywu."""
     st.markdown("""
         <style>
-        /* Import Google Fonts: Playfair Display (Titles) & Montserrat (Body) */
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@700&display=swap');
+        /* Import Google Fonts: Playfair Display (dla tytułów) i Montserrat (dla tekstu) */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght=700&family=Playfair+Display:wght@700&display=swap');
 
         /* Global font settings */
         html, body, [class*="st-"], [class*="css-"] {
             font-family: 'Montserrat', sans-serif;
-            color: #FAFAFA; /* Off-white text for readability on dark background */
+            color: #FAFAFA; /* Jasny tekst dla ciemnego tła */
         }
 
         /* Main App Background - Dark Onyx */
@@ -30,26 +30,27 @@ def load_custom_css():
             background-color: #1A1A1A;
         }
 
-        /* Sidebar Background - Slightly lighter dark grey */
+        /* USUNIĘTO SIDEBAR CSS - Sidebar będzie teraz ciemny z automatu, ale jest schowany */
         [data-testid="stSidebar"] {
-            background-color: #222222;
+            background-color: #222222 !important; /* Upewniamy się, że jest ciemny, mimo że go ukryliśmy */
             border-right: 1px solid #333333;
         }
 
-        /* Perfume Cards */
+
+        /* Karty perfum */
         [data-testid="stVerticalBlockBorder"] {
-            background-color: #2A2A2A; /* Card background */
+            background-color: #2A2A2A; 
             border-radius: 12px;
-            border: 1px solid #3A3A3A; /* Subtle border */
+            border: 1px solid #3A3A3A; 
             padding: 20px !important;
         }
         
-        /* Card Images */
+        /* Obrazek na karcie */
         .stImage img {
             border-radius: 8px;
         }
 
-        /* Rating Metrics */
+        /* Metryka oceny (Rating) */
         [data-testid="stMetric"] {
             background-color: #333333;
             border-radius: 8px;
@@ -57,37 +58,41 @@ def load_custom_css():
             border: 1px solid #444444;
         }
 
-        /* Typography: Luxury Headers */
+        /* Tytuły (H1, H2, H3) - nowa, luksusowa czcionka */
         h1, h2, h3 {
             font-family: 'Playfair Display', serif;
             font-weight: 700;
-            color: #FFFFFF;
+            color: #FFFFFF; 
             letter-spacing: 0.5px;
         }
 
-        /* Luxury Gold Links */
+        /* Złote linki */
         a {
-            color: #D4AF37 !important; /* Metallic Gold */
+            color: #D4AF37 !important; 
             text-decoration: none;
             font-weight: 600;
         }
         a:hover {
             text-decoration: underline;
-            color: #F4CF57 !important; /* Lighter gold on hover */
+            color: #F4CF57 !important; 
         }
 
-        /* Input Widgets (Dropdowns, Sliders) Styling */
-        [data-testid="stSelectbox"] div, [data-testid="stMultiSelect"] div {
+        /* Poprawki dla widgetów Streamlit, aby pasowały do ciemnego motywu */
+        [data-testid="stSelectbox"] div, [data-testid="stMultiselect"] div {
             background-color: #2A2A2A;
             color: white;
+        }
+
+        /* Zmień kolor czcionki inputów (rozwiąże problem "lania się" na jasnym tle w inputach) */
+        .stMultiSelect, .stSelectbox {
+             color: white; 
         }
         </style>
     """, unsafe_allow_html=True)
 
-# --- Helper Functions ---
-
+# --- Helper Functions (Same, poprawne funkcje co ostatnio) ---
 @st.cache_data
-def load_data(filepath, cache_buster_final): # Added cache buster to force reload
+def load_data(filepath, cache_buster_final): # v11 - Nowy cache buster
     """Loads, cleans, and preprocesses data from the CSV file."""
     try:
         df = pd.read_csv(filepath)
@@ -103,7 +108,6 @@ def load_data(filepath, cache_buster_final): # Added cache buster to force reloa
         }, inplace=True)
         
         # 2. Fix "Glued" Names (Remove gender text from name)
-        # Example: "9am Afnanfor women" -> "9am Afnan"
         if 'name' in df.columns and 'gender' in df.columns:
             df['name'] = df.apply(
                 lambda row: str(row['name']).replace(str(row['gender']), '').strip() 
@@ -129,12 +133,10 @@ def load_data(filepath, cache_buster_final): # Added cache buster to force reloa
         # 6. Robust Accord Cleaning (Fixes double quotes and spaces)
         all_accords_flat_list = []
         for accord_string in df['main_accords'].dropna():
-            # Remove brackets if present: "['citrus', 'woody']" -> "'citrus', 'woody'"
             if isinstance(accord_string, str):
                 cleaned_string = accord_string.strip("[]") 
                 accords = cleaned_string.split(",")
                 for accord in accords:
-                    # Strip spaces, then strip quotes, then strip spaces again, then lowercase
                     cleaned_accord = accord.strip().strip("'\"").strip().lower()
                     if cleaned_accord: 
                         all_accords_flat_list.append(cleaned_accord)
@@ -160,10 +162,8 @@ def display_perfume_card(perfume):
         col1, col2 = st.columns([1, 2])
         
         with col1:
-            # Dark themed placeholder image
-            st.image("https://placehold.co/200x200/2A2A2A/666?text=Perfume", use_column_width=True)
+            st.image("https://placehold.co/200x200/2A2A2A/666?text=Perfume", use_column_width=True) 
             
-            # External Link
             if perfume.img_link and isinstance(perfume.img_link, str):
                 st.markdown(f"<div style='text-align: center; margin-top: 10px;'><a href='{perfume.img_link}' target='_blank'>View on Fragrantica ↗</a></div>", unsafe_allow_html=True)
 
@@ -172,7 +172,6 @@ def display_perfume_card(perfume):
             
             st.metric(label="Rating", value=f"{perfume.score:.2f}", delta=f"{perfume.ratings} votes")
             
-            # Display Accords as tags
             if perfume.main_accords:
                 if isinstance(perfume.main_accords, str):
                     cleaned_string = perfume.main_accords.strip("[]")
@@ -186,55 +185,58 @@ def display_perfume_card(perfume):
                     if cleaned_accord:
                         accords_list_clean.append(f"`{cleaned_accord}`")
                 
-                st.markdown("**Notes:** " + " ".join(accords_list_clean[:5])) # Show top 5 notes
+                st.markdown("**Notes:** " + " ".join(accords_list_clean[:5])) 
 
 # --- Main Application Logic ---
 
 # 1. Load CSS
 load_custom_css()
 
-# 2. Load Data (Version 9 forces a cache refresh)
-df, unique_accords = load_data("fra_perfumes.csv", cache_buster_final="v10")
+# 2. Load Data (v11 forces a final cache refresh)
+df, unique_accords = load_data("fra_perfumes.csv", cache_buster_final="v11")
 
 if df is not None:
-    # --- Sidebar ---
-    with st.sidebar:
-        st.title("Filters")
-        st.markdown("Refine your search below.")
-        
-        selected_accords = st.multiselect(
-            "Select scent notes:",
-            options=unique_accords,
-            default=[]
-        )
+    # --- Główny kontener filtrów (Teraz na górze!) ---
+    st.header("Luxury Perfume Finder") # ZMIENIONO: st.title na st.header, aby zmniejszyć rozmiar
+    st.markdown("Find your signature scent instantly.")
+    
+    st.markdown("---")
+    st.subheader("Filter Your Search")
 
+    # Używamy st.columns, aby filtry były obok siebie na dużym ekranie
+    col_gender, col_score, col_accords = st.columns([1, 1, 2]) 
+    
+    with col_gender:
         gender_options = ["Female", "Male", "Unisex"] 
         selected_gender = st.selectbox(
-            "Select gender:",
+            "Select Gender:",
             options=gender_options,
             index=0 
         )
 
+    with col_score:
         min_score = st.slider(
-            "Minimum rating:",
+            "Minimum Rating:",
             min_value=1.0,
             max_value=5.0,
             value=4.0,
             step=0.1
         )
-        
-        st.markdown("---")
-        st.caption("© 2024 Magdalena Romaniecka. Data sourced from Kaggle.")
 
-    # --- Main Content ---
+    with col_accords:
+        selected_accords = st.multiselect(
+            "Select Scent Notes:",
+            options=unique_accords,
+            default=[]  
+        )
+
+    st.markdown("---")
+    
+    # --- Tab 1: Finder ---
     tab1, tab2 = st.tabs(["**🔎 Perfume Finder**", "**📊 Market Analysis**"])
 
-    # --- Tab 1: Finder ---
     with tab1:
-        st.title("Luxury Perfume Finder")
-        st.markdown("Discover your signature scent based on chemical composition and community ratings.")
-
-        # Filtering Logic
+        # Filtering Logic (Taka sama, ale filtry są zdefiniowane wyżej)
         filtered_df = df[df['gender'] == selected_gender].copy()
         filtered_df = filtered_df[filtered_df['score'] >= min_score]
 
@@ -258,20 +260,19 @@ if df is not None:
             filtered_df = filtered_df[mask]
 
         # Results
-        st.markdown("---")
-        st.markdown(f"### Found {len(filtered_df)} matches")
+        st.subheader(f"Found {len(filtered_df)} exclusive matches:")
 
         if filtered_df.empty:
             st.info("No perfumes found matching these exact criteria. Try removing some note filters.")
         else:
-            # Centered layout: We iterate and just show cards one after another
-            # This stacks them perfectly on mobile and centers them on desktop
+            # Cards are displayed one under the other (ideal for centered layout)
             for index, perfume in enumerate(filtered_df.itertuples()):
                 display_perfume_card(perfume)
 
     # --- Tab 2: Statistics ---
     with tab2:
         st.title("Market Insights")
+        st.markdown("Analysis of trends across the database.")
 
         # Chart 1
         st.markdown("### Rating Distribution")
@@ -279,8 +280,8 @@ if df is not None:
             df, x="score", nbins=50, 
             title="",
             labels={"score": "Rating"},
-            template="plotly_dark", # Dark theme for chart
-            color_discrete_sequence=['#D4AF37'] # Gold color
+            template="plotly_dark", 
+            color_discrete_sequence=['#D4AF37'] 
         )
         fig_hist.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig_hist, use_container_width=True)
@@ -308,9 +309,12 @@ if df is not None:
             title="",
             labels={"x": "Count", "y": "Note"},
             template="plotly_dark",
-            color_discrete_sequence=['#D4AF37'] # Gold color
+            color_discrete_sequence=['#D4AF37'] 
         )
         fig_bar.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig_bar, use_container_width=True)
+
+    st.markdown("---")
+    st.caption("© 2024 Magdalena Romaniecka. Code built with Streamlit.")
 else:
     st.error("Application failed to load data.")
