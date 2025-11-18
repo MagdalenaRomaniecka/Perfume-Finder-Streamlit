@@ -36,11 +36,22 @@ def load_custom_css():
             border-right: 1px solid #333333;
         }
 
-        /* CRITICAL FIX: Menu Dropdown Color (Fixes invisible text issue) */
-        div[role="listbox"] {
+        /* KRYTYCZNA NAPRAWA: ROZWIJANE MENU I LISTY (DROPDOWNS/MULTSELECTS) */
+        div[data-baseweb="popover"] {
+            /* Tło całego menu pop-up */
             background-color: #2A2A2A !important; 
             border: 1px solid #444444 !important; 
         }
+        div[data-baseweb="popover"] ul li {
+            /* Styl dla pojedynczych elementów listy */
+            color: #FAFAFA !important; /* Tekst musi być biały */
+            background-color: #2A2A2A !important;
+        }
+        div[data-baseweb="popover"] ul li:hover {
+            /* Efekt najechania myszką (hover) */
+            background-color: #3A3A3A !important;
+        }
+
 
         /* Card styles */
         [data-testid="stVerticalBlockBorder"] {
@@ -81,47 +92,25 @@ def load_custom_css():
         </style>
     """, unsafe_allow_html=True)
 
-# --- Helper Functions (Same, correct functions) ---
+# --- Helper Functions (No changes here) ---
 @st.cache_data
 def load_data(filepath, cache_buster_final): # v11 - New cache buster
     """Loads, cleans, and preprocesses data from the CSV file."""
     try:
         df = pd.read_csv(filepath)
-        
-        # 1. Rename columns to match internal logic
-        df.rename(columns={
-            'Name': 'name',
-            'Gender': 'gender',
-            'Rating Value': 'score',
-            'Rating Count': 'ratings',
-            'Main Accords': 'main_accords',
-            'url': 'img_link'
-        }, inplace=True)
-        
-        # 2. Fix "Glued" Names (Remove gender text from name)
+        # ... (Data Cleaning and Mapping logic) ...
+        df.rename(columns={'Name': 'name', 'Gender': 'gender', 'Rating Value': 'score', 'Rating Count': 'ratings', 'Main Accords': 'main_accords', 'url': 'img_link'}, inplace=True)
         if 'name' in df.columns and 'gender' in df.columns:
             df['name'] = df.apply(
                 lambda row: str(row['name']).replace(str(row['gender']), '').strip() 
                 if pd.notna(row['name']) and pd.notna(row['gender']) else row['name'], 
                 axis=1
             )
-
-        # 3. Map Gender Data to Clean Categories (Fixes 'for women' not matching 'Female')
-        gender_map = {
-            'for women': 'Female',
-            'for men': 'Male',
-            'for women and men': 'Unisex'
-        }
+        gender_map = {'for women': 'Female', 'for men': 'Male', 'for women and men': 'Unisex'}
         df['gender'] = df['gender'].map(gender_map)
-        
-        # 4. Remove incomplete rows
         df.dropna(subset=['main_accords', 'name', 'img_link', 'gender'], inplace=True)
-        
-        # 5. Convert scores to numbers
         if df['score'].dtype == 'object':
             df['score'] = df['score'].str.replace(',', '.').astype(float)
-        
-        # 6. Robust Accord Cleaning (Fixes double quotes and spaces)
         all_accords_flat_list = []
         for accord_string in df['main_accords'].dropna():
             if isinstance(accord_string, str):
@@ -131,11 +120,8 @@ def load_data(filepath, cache_buster_final): # v11 - New cache buster
                     cleaned_accord = accord.strip().strip("'\"").strip().lower()
                     if cleaned_accord: 
                         all_accords_flat_list.append(cleaned_accord)
-        
         unique_accords = sorted(list(set(all_accords_flat_list)))
-        
         return df, unique_accords
-        
     except FileNotFoundError:
         st.error("Error: Data file not found. Please ensure `fra_perfumes.csv` is in the directory.")
         return None, []
@@ -150,31 +136,24 @@ def display_perfume_card(perfume):
     """Displays a single perfume card in the UI."""
     with st.container(border=True):
         col1, col2 = st.columns([1, 2])
-        
         with col1:
-            # Używamy placeholder'a z linkiem
             st.image("https://placehold.co/200x200/2A2A2A/666?text=Perfume", use_column_width=True) 
-            
             if perfume.img_link and isinstance(perfume.img_link, str):
                 st.markdown(f"<div style='text-align: center; margin-top: 10px;'><a href='{perfume.img_link}' target='_blank'>View on Fragrantica ↗</a></div>", unsafe_allow_html=True)
-
         with col2:
             st.markdown(f"### {perfume.name}")
             st.metric(label="Rating", value=f"{perfume.score:.2f}", delta=f"{perfume.ratings} votes")
-            
             if perfume.main_accords:
                 if isinstance(perfume.main_accords, str):
                     cleaned_string = perfume.main_accords.strip("[]")
                     accords_list_raw = cleaned_string.split(",")
                 else:
                     accords_list_raw = []
-
                 accords_list_clean = []
                 for acc in accords_list_raw:
                     cleaned_accord = acc.strip().strip("'\"").strip()
                     if cleaned_accord:
                         accords_list_clean.append(f"`{cleaned_accord}`")
-                
                 st.markdown("**Notes:** " + " ".join(accords_list_clean[:5])) 
 
 # --- Main Application Logic ---
