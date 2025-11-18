@@ -24,7 +24,6 @@ def load_custom_css():
         [data-testid="stAppViewContainer"] { background-color: #050505; }
         
         /* REMOVE HEADER & SIDEBAR COMPLETELY */
-        /* To ukrywa górny pasek i przycisk "keyboard" */
         [data-testid="stHeader"] { display: none; }
         [data-testid="stSidebarCollapsedControl"] { display: none !important; }
         section[data-testid="stSidebar"] { display: none; }
@@ -34,7 +33,7 @@ def load_custom_css():
 
         /* --- HIGH CONTRAST INPUTS (FIXING READABILITY) --- */
         
-        /* 1. Widget Labels (Titles like "Gender") */
+        /* 1. Widget Labels */
         label p {
             color: #D4AF37 !important; /* Gold */
             font-size: 14px !important;
@@ -43,16 +42,14 @@ def load_custom_css():
             letter-spacing: 1px;
         }
 
-        /* 2. Radio Buttons (Gender) - CRITICAL FIX FOR DOT VISIBILITY */
+        /* 2. Radio Buttons (Gender) - CRITICAL FIX */
         div[role="radiogroup"] label div[data-testid="stMarkdownContainer"] p {
             color: #FFFFFF !important; /* Bright White Text */
             font-weight: 500 !important;
         }
-        /* Force the outer ring to be Gold */
         div[role="radiogroup"] div[data-baseweb="radio"] div {
             border-color: #D4AF37 !important;
         }
-        /* Force the inner filled dot to be Gold when checked */
         div[role="radiogroup"] [aria-checked="true"] div[data-baseweb="radio"] div {
             background-color: #D4AF37 !important;
         }
@@ -62,7 +59,6 @@ def load_custom_css():
             color: #FFFFFF !important; /* Bright White Numbers */
             font-weight: 600 !important;
         }
-        /* Slider Track */
         div[data-testid="stSlider"] div[data-baseweb="slider"] div {
             background-color: #D4AF37 !important;
         }
@@ -71,7 +67,6 @@ def load_custom_css():
         .stMultiSelect div[data-baseweb="select"] span {
             color: #FFFFFF !important;
         }
-        /* Dropdown options background */
         div[role="listbox"] ul {
             background-color: #1A1A1A !important;
         }
@@ -80,7 +75,7 @@ def load_custom_css():
             background-color: #1A1A1A !important;
         }
 
-        /* --- EXPANDER STYLING (Clean Dark Box) --- */
+        /* --- EXPANDER STYLING --- */
         .streamlit-expanderHeader {
             background-color: #111111 !important;
             border: 1px solid #333 !important;
@@ -89,18 +84,18 @@ def load_custom_css():
             border-radius: 5px;
         }
         
-        /* --- PERFUME CARD STYLING (Text Only, Clean) --- */
+        /* --- PERFUME CARD STYLING --- */
         .perfume-card {
             background-color: #121212;
             border-top: 1px solid #333;
             border-bottom: 1px solid #333;
-            padding: 20px 0; /* Vertical padding only */
+            padding: 20px 0;
             margin-bottom: 0;
         }
         
         .p-name {
             font-family: 'Playfair Display', serif;
-            font-size: 18px; /* Standard readable size */
+            font-size: 18px;
             color: #FFFFFF;
             font-weight: 600;
             margin-bottom: 5px;
@@ -132,10 +127,10 @@ def load_custom_css():
             border-radius: 4px;
         }
 
-        /* --- HEADER TYPOGRAPHY (Smaller) --- */
+        /* --- HEADER TYPOGRAPHY --- */
         .main-title {
             font-family: 'Playfair Display', serif;
-            font-size: 28px; /* Reduced from 42px */
+            font-size: 28px;
             color: #D4AF37;
             text-align: center;
             margin-bottom: 5px;
@@ -155,7 +150,7 @@ def load_custom_css():
 
 # --- Data Loading ---
 @st.cache_data
-def load_data(filepath, cache_buster_v22): # v22 Cache Buster
+def load_data(filepath, cache_buster_v23): # v23 Cache Buster
     try:
         df = pd.read_csv(filepath)
         # Rename
@@ -169,4 +164,104 @@ def load_data(filepath, cache_buster_v22): # v22 Cache Buster
             )
             
         # Map genders
-        gender_map = {'for women': '
+        gender_map = {'for women': 'Female', 'for men': 'Male', 'for women and men': 'Unisex'}
+        df['gender'] = df['gender'].map(gender_map)
+        
+        # Cleanup
+        df.dropna(subset=['main_accords', 'name', 'img_link', 'gender'], inplace=True)
+        
+        # Convert score
+        if df['score'].dtype == 'object':
+            df['score'] = df['score'].str.replace(',', '.').astype(float)
+            
+        # Extract unique accords
+        all_accords = set()
+        for accords_str in df['main_accords'].dropna():
+            if isinstance(accords_str, str):
+                raw_list = accords_str.strip("[]").split(",")
+                for item in raw_list:
+                    clean_item = item.strip().strip("'\"").strip().lower()
+                    if clean_item: all_accords.add(clean_item)
+        
+        return df, sorted(list(all_accords))
+    except Exception:
+        return None, []
+
+def render_minimal_card(perfume):
+    """Renders a very clean, text-based card."""
+    
+    notes_str = ""
+    if isinstance(perfume.main_accords, str):
+        raw = perfume.main_accords.strip("[]").split(",")
+        clean = [n.strip().strip("'\"").strip().lower() for n in raw[:4]] # Top 4 notes
+        notes_str = ", ".join(clean)
+
+    html = f"""
+    <div class="perfume-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="p-name">{perfume.name}</div>
+            <div class="p-rating">★ {perfume.score:.1f}</div>
+        </div>
+        <div class="p-notes">{notes_str}</div>
+        <div style="text-align: right; margin-top: 10px;">
+            <a href="{perfume.img_link}" target="_blank" style="text-decoration: none; color: #D4AF37; font-size: 11px; font-weight: 600;">DETAILS ↗</a>
+        </div>
+    </div>
+    """
+    st.markdown(html, unsafe_allow_html=True)
+
+# --- Main Logic ---
+load_custom_css()
+df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v23="v23")
+
+if df is not None:
+    
+    # --- HEADER ---
+    st.markdown('<div class="main-title">Perfume Finder</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">Curated Database</div>', unsafe_allow_html=True)
+    
+    # --- FILTERS ---
+    with st.expander("⚡ FILTER SETTINGS", expanded=True):
+        
+        # Gender
+        gender = st.radio("GENDER", ["All", "Female", "Male", "Unisex"], horizontal=True)
+        
+        st.write("")
+        
+        # Score
+        score = st.slider("MIN RATING", 1.0, 5.0, 4.0, 0.1)
+        
+        st.write("")
+
+        # Notes
+        notes = st.multiselect("NOTES", unique_accords, placeholder="Select ingredients...")
+        
+    # --- FILTERING LOGIC ---
+    if gender == "All":
+        filtered = df.copy()
+    else:
+        filtered = df[df['gender'] == gender].copy()
+
+    filtered = filtered[filtered['score'] >= score]
+    
+    if notes:
+        def check_notes(row_str):
+            if pd.isna(row_str): return False
+            row_list = [n.strip().strip("'\"").strip().lower() for n in row_str.strip("[]").split(",")]
+            return all(note in row_list for note in notes)
+        filtered = filtered[filtered['main_accords'].apply(check_notes)]
+
+    # --- RESULTS ---
+    st.write("")
+    st.markdown(f"<div style='text-align: center; color: #666; font-size: 11px; letter-spacing: 1px; margin-bottom: 20px;'>SHOWING {len(filtered)} RESULTS</div>", unsafe_allow_html=True)
+
+    if filtered.empty:
+        st.info("No perfumes found.")
+    else:
+        for row in filtered.head(40).itertuples():
+            render_minimal_card(row)
+            
+    st.markdown("<br><br><div style='text-align: center; color: #333; font-size: 10px;'>© 2024</div>", unsafe_allow_html=True)
+
+else:
+    st.error("System Error.")
