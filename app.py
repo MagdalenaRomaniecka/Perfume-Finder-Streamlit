@@ -36,26 +36,6 @@ def load_custom_css():
             border-right: 1px solid #333333;
         }
 
-        /* KRYTYCZNA NAPRAWA: ROZWIJANE MENU I LISTY (DROPDOWNS/MULTSELECTS) */
-        /* Ten selektor jest kluczowy - nadpisuje tło menu */
-        div[data-baseweb="popover"] {
-            background-color: #2A2A2A !important; 
-            border: 1px solid #444444 !important; 
-        }
-        
-        /* Ten selektor jest kluczowy - nadpisuje elementy listy */
-        div[data-baseweb="popover"] ul li {
-            color: #FAFAFA !important; /* Tekst musi być biały */
-            background-color: #2A2A2A !important;
-        }
-        
-        /* To nadpisuje zaznaczone/wybrane elementy w menu */
-        div[data-baseweb="select"] div[data-baseweb="input"] {
-            color: #FAFAFA !important;
-            background-color: #2A2A2A !important;
-        }
-
-
         /* Card styles */
         [data-testid="stVerticalBlockBorder"] {
             background-color: #2A2A2A; 
@@ -88,7 +68,7 @@ def load_custom_css():
             color: #F4CF57 !important; 
         }
 
-        /* Input Fixes */
+        /* Input Fixes - Ensures radio buttons and checkbox text are white */
         .stMultiSelect, .stSelectbox, .stSlider {
              color: white; 
         }
@@ -169,12 +149,13 @@ df, unique_accords = load_data("fra_perfumes.csv", cache_buster_final="v11")
 
 if df is not None:
     
-    # 3. FILTERS ARE MOVED TO SIDEBAR
+    # 3. FILTERS ARE MOVED TO SIDEBAR - NOW WITH RADIO AND CHECKBOXES
     with st.sidebar:
         st.header("Refine Your Search")
         
+        # Używamy Radio Buttons zamiast Selectbox - jest zawsze widoczne
         gender_options = ["Female", "Male", "Unisex"] 
-        selected_gender = st.selectbox(
+        selected_gender = st.radio(
             "Select Gender:",
             options=gender_options,
             index=0 
@@ -187,12 +168,19 @@ if df is not None:
             value=4.0,
             step=0.1
         )
+        
+        st.markdown("---")
+        st.subheader("Select Scent Notes:")
+        
+        # Używamy Checkboxów zamiast Multiselect (rozwiązuje problem jasnego menu)
+        selected_accords = []
+        
+        # Wyświetlamy akordy w 2 kolumnach dla lepszej estetyki sidebara
+        cols = st.columns(2)
+        for i, accord in enumerate(unique_accords):
+            if cols[i % 2].checkbox(accord):
+                selected_accords.append(accord)
 
-        selected_accords = st.multiselect(
-            "Select Scent Notes:",
-            options=unique_accords,
-            default=[]  
-        )
         st.markdown("---")
         st.caption("Filters update results instantly.")
     
