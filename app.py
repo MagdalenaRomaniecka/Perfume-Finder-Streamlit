@@ -14,7 +14,6 @@ st.set_page_config(
 # --- 2. ANALYTICS ---
 def inject_ga4():
     GA_ID = "G-S5NLHL3KFM"
-    # Uzywam pojedynczych cudzyslowow dla HTML zeby uniknac konfliktu
     ga_code = f"""
     <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
     <script>
@@ -54,8 +53,8 @@ def get_initials(name):
 
 # --- 4. CSS STYLING (SAFE SPLIT METHOD) ---
 def load_custom_css():
-    # Czesc 1: Tlo i Czcionki
-    css_part1 = """
+    # PART 1: General & Sidebar Typography
+    css_1 = """
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@600;700&display=swap');
         
@@ -67,46 +66,80 @@ def load_custom_css():
         * { font-family: 'Montserrat', sans-serif; color: #E0E0E0; }
         h1, h2, h3 { font-family: 'Playfair Display', serif; color: #D4AF37 !important; }
         
+        /* Remove default white header */
         header, [data-testid="stHeader"] {
             background-color: #0E0E0E !important;
             border-bottom: 1px solid #333;
         }
-    </style>
-    """
-    
-    # Czesc 2: Sidebar i Dropdown (Naprawa bledu)
-    css_part2 = """
-    <style>
+
+        /* SIDEBAR */
         section[data-testid="stSidebar"] {
             background-color: #050505 !important;
             border-right: 1px solid #222;
         }
-        .stRadio, .stMultiSelect, .stSlider { margin-bottom: -20px !important; }
+        .stSidebar h2, .stSidebar h3 {
+            font-size: 12px !important;
+            color: #D4AF37 !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
         .stSidebar label p { font-size: 11px !important; color: #AAA !important; }
-        
-        /* DROPDOWN FIX */
+        .stRadio, .stMultiSelect, .stSlider { margin-bottom: -15px !important; }
+    </style>
+    """
+
+    # PART 2: FIX DROPDOWN FONT SIZE & SLIDER
+    css_2 = """
+    <style>
+        /* --- DROPDOWN FONT FIX (Small & Readable) --- */
+        /* The container of the list */
         div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
             background-color: #0E0E0E !important;
             border: 1px solid #333 !important;
         }
+        /* The individual options */
         li[role="option"] {
              background-color: #0E0E0E !important;
              color: #E0E0E0 !important;
+             font-size: 11px !important; /* FORCE SMALL FONT */
+             padding: 4px 8px !important; /* Smaller padding */
         }
+        /* Text inside option */
+        li[role="option"] span {
+            font-size: 11px !important;
+        }
+        
+        /* Hover state */
         li[role="option"]:hover, li[role="option"][aria-selected="true"] {
             background-color: #D4AF37 !important;
             color: #000000 !important;
         }
+        
+        /* Selected Tags (Chips) */
         span[data-baseweb="tag"] {
             background-color: #222 !important;
             color: #D4AF37 !important;
             border: 1px solid #444 !important;
+            font-size: 10px !important;
+        }
+
+        /* --- SLIDER SCALE FIX --- */
+        /* The text showing value */
+        div[data-testid="stThumbValue"] {
+            color: #D4AF37 !important;
+            font-family: 'Montserrat', sans-serif !important;
+            font-size: 12px !important;
+        }
+        /* The dots/ticks */
+        div[data-testid="stSliderTickBar"] {
+            visibility: visible !important;
+            color: #666 !important;
         }
     </style>
     """
-    
-    # Czesc 3: Elementy Karty i Suwaka
-    css_part3 = """
+
+    # PART 3: CARDS & BUTTONS
+    css_3 = """
     <style>
         .title-frame {
             border: 3px double #D4AF37;
@@ -117,9 +150,11 @@ def load_custom_css():
             box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
         }
         
-        div[data-testid="stThumbValue"] { color: #D4AF37 !important; font-weight: bold !important; }
+        /* Metrics */
         div[data-testid="stMetricValue"] { color: #D4AF37 !important; }
-        
+        div[data-testid="stMetricLabel"] { color: #888 !important; }
+
+        /* Fragrantica Button */
         a.fragrantica-btn {
             display: inline-block;
             margin-top: 12px;
@@ -136,7 +171,8 @@ def load_custom_css():
             background-color: #D4AF37;
             color: #000000 !important;
         }
-        
+
+        /* Arrow */
         [data-testid="stSidebarCollapsedControl"] {
             color: #D4AF37 !important;
             transform: scale(1.2);
@@ -147,10 +183,9 @@ def load_custom_css():
     </style>
     """
     
-    # Renderujemy kazdy kawalek osobno
-    st.markdown(css_part1, unsafe_allow_html=True)
-    st.markdown(css_part2, unsafe_allow_html=True)
-    st.markdown(css_part3, unsafe_allow_html=True)
+    st.markdown(css_1, unsafe_allow_html=True)
+    st.markdown(css_2, unsafe_allow_html=True)
+    st.markdown(css_3, unsafe_allow_html=True)
 
 # --- 5. DATA LOADING ---
 @st.cache_data
@@ -190,6 +225,7 @@ def render_gold_card(perfume):
         col1, col2, col3 = st.columns([1, 3.5, 1.5])
         
         with col1:
+            # GOLD SEAL
             st.markdown(f"""
             <div style="
                 width: 60px; height: 60px; 
@@ -206,6 +242,7 @@ def render_gold_card(perfume):
             """, unsafe_allow_html=True)
         
         with col2:
+            # INFO
             st.markdown(f"""
             <div style="border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 5px;">
                 <span style="font-family: 'Playfair Display'; font-size: 18px; color: #FFF; letter-spacing: 0.5px;">
@@ -232,22 +269,25 @@ df, unique_accords = load_data("fra_perfumes.csv")
 
 if df is not None:
     with st.sidebar:
-        # 1. NOTES (FIRST)
+        # NOTES (First)
         st.markdown("### NOTES")
         notes = st.multiselect("notes_select", unique_accords, placeholder="Select...", label_visibility="collapsed")
         st.write("")
 
-        # 2. CATEGORY (SECOND)
+        # CATEGORY
         st.markdown("### CATEGORY")
         gender = st.radio("gender_select", ["All", "Female", "Male", "Unisex"], label_visibility="collapsed")
         st.write("")
 
-        # 3. RATING (THIRD)
+        # RATING (Standard Slider with Steps)
         st.markdown("### RATING")
-        score = st.select_slider(
+        # Using standard slider with step=0.5 for clearer "snapping"
+        score = st.slider(
             "rating_slider", 
-            options=[1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0],
-            value=4.0,
+            min_value=1.0, 
+            max_value=5.0, 
+            value=4.0, 
+            step=0.5,
             label_visibility="collapsed"
         )
         
