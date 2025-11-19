@@ -1,21 +1,21 @@
 import streamlit as st
 import pandas as pd
 
-# --- Konfiguracja Strony ---
+# --- KONFIGURACJA STRONY ---
 st.set_page_config(
-    page_title="Perfume Finder Final",
-    page_icon="💎",
+    page_title="Perfume Finder",
+    page_icon="✨",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# --- CSS: Czysty Mobile, Kontrast, Brak Paska ---
+# --- CSS: CZYSTY MOBILE, WYSOKI KONTRAST ---
 def load_custom_css():
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
 
-        /* Ciemne tło */
+        /* TŁO - GŁĘBOKA CZERŃ */
         html, body, [class*="st-"], [class*="css-"] {
             font-family: 'Montserrat', sans-serif;
             color: #E0E0E0;
@@ -149,9 +149,9 @@ def load_custom_css():
         </style>
     """, unsafe_allow_html=True)
 
-# --- Ładowanie Danych ---
+# --- ŁADOWANIE DANYCH ---
 @st.cache_data
-def load_data(filepath, force_update_v101): 
+def load_data(filepath, force_fix_v99): 
     try:
         df = pd.read_csv(filepath)
         df.rename(columns={'Name': 'name', 'Gender': 'gender', 'Rating Value': 'score', 'Rating Count': 'ratings', 'Main Accords': 'main_accords', 'url': 'img_link'}, inplace=True)
@@ -175,9 +175,10 @@ def load_data(filepath, force_update_v101):
         all_accords = set()
         for accords_str in df['main_accords'].dropna():
             if isinstance(accords_str, str):
-                raw_list = accords_str.strip("[]").split(",")
+                # Agresywne czyszczenie
+                raw_list = accords_str.replace("[", "").replace("]", "").replace("'", "").replace('"', "").split(",")
                 for item in raw_list:
-                    clean_item = item.strip().strip("'\"").strip().lower()
+                    clean_item = item.strip().lower()
                     if clean_item: all_accords.add(clean_item)
         
         return df, sorted(list(all_accords))
@@ -188,8 +189,9 @@ def render_card(perfume):
     """Render Clean HTML Card"""
     notes_str = ""
     if isinstance(perfume.main_accords, str):
-        raw = perfume.main_accords.strip("[]").split(",")
-        clean = [n.strip().strip("'\"").strip().lower() for n in raw[:4]]
+        # Agresywne czyszczenie do wyświetlania
+        raw = perfume.main_accords.replace("[", "").replace("]", "").replace("'", "").replace('"', "").split(",")
+        clean = [n.strip().strip("'\"").strip().lower() for n in raw[:4] if n.strip()]
         notes_str = ", ".join(clean)
 
     html = f"""
@@ -206,25 +208,30 @@ def render_card(perfume):
     """
     st.markdown(html, unsafe_allow_html=True)
 
-# --- Main Logic ---
+# --- GŁÓWNA LOGIKA ---
 load_custom_css()
-df, unique_accords = load_data("fra_perfumes.csv", force_update_v101="v101")
+df, unique_accords = load_data("fra_perfumes.csv", force_fix_v99="v99")
 
 if df is not None:
-    # TOAST - Potwierdzenie aktualizacji
-    st.toast("System zaktualizowany do wersji OSTATECZNEJ!", icon="✅")
-
-    st.markdown('<div class="main-title">PERFUME FINDER: OSTATECZNA WERSJA</div>', unsafe_allow_html=True)
+    
+    # --- TYTUŁ ---
+    st.markdown('<div class="main-title">PERFUME FINDER</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">LUXURY DATABASE</div>', unsafe_allow_html=True)
     
+    # --- FILTRY ---
     with st.expander("⚡ FILTERS", expanded=True):
+        # Płeć (Domyślnie All)
         gender = st.radio("GENDER", ["All", "Female", "Male", "Unisex"], horizontal=True)
         st.write("")
+        
+        # Ocena
         score = st.slider("MIN RATING", 1.0, 5.0, 4.0, 0.1)
         st.write("")
+        
+        # Nuty
         notes = st.multiselect("NOTES", unique_accords, placeholder="Select ingredients...")
         
-    # Logic
+    # --- LOGIKA FILTROWANIA ---
     if gender == "All":
         filtered = df.copy()
     else:
@@ -234,11 +241,11 @@ if df is not None:
     if notes:
         def check_notes(row_str):
             if pd.isna(row_str): return False
-            row_list = [n.strip().strip("'\"").strip().lower() for n in row_str.strip("[]").split(",")]
-            return all(note in row_list for note in notes)
+            row_clean = row_str.replace("[", "").replace("]", "").replace("'", "").replace('"', "").lower()
+            return all(note in row_clean for note in notes)
         filtered = filtered[filtered['main_accords'].apply(check_notes)]
 
-    # Results
+    # --- WYNIKI ---
     st.write("")
     st.markdown(f"<div style='text-align: center; color: #666; font-size: 11px; margin-bottom: 20px;'>FOUND {len(filtered)} RESULTS</div>", unsafe_allow_html=True)
 
