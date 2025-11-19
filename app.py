@@ -4,7 +4,7 @@ import re
 import ast
 import streamlit.components.v1 as components
 
-# --- 1. Konfiguracja strony (Musi byc pierwsza) ---
+# --- 1. Konfiguracja strony ---
 st.set_page_config(
     page_title="Perfume Finder",
     page_icon="✨",
@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. Google Analytics (Twoj kod G-S5NLHL3KFM) ---
+# --- 2. Google Analytics (Twój kod G-S5NLHL3KFM) ---
 def inject_ga4():
     GA_ID = "G-S5NLHL3KFM"
     
@@ -29,20 +29,22 @@ def inject_ga4():
 
 inject_ga4()
 
-# --- 3. Style CSS (Dark Luxury) ---
+# --- 3. Style CSS (Poprawiony Kontrast) ---
 def load_custom_css():
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
 
+        /* Tło i czcionka ogólna */
         html, body, [class*="st-"], [class*="css-"] {
             font-family: 'Montserrat', sans-serif;
-            color: #E0E0E0;
+            color: #F0F0F0 !important; /* Jaśniejsza biel */
             background-color: #0E0E0E; 
         }
         [data-testid="stAppViewContainer"] { background-color: #0E0E0E; }
         [data-testid="stHeader"] { display: none; }
 
+        /* Pasek boczny */
         section[data-testid="stSidebar"] {
             background-color: #111; 
             border-right: 1px solid #333;
@@ -51,41 +53,54 @@ def load_custom_css():
         .stSidebar .stMarkdown h1, .stSidebar .stMarkdown h2, .stSidebar .stMarkdown h3 {
             color: #D4AF37 !important;
             font-family: 'Playfair Display', serif;
-            margin-bottom: 10px !important;
+            margin-bottom: 15px !important;
         }
 
+        /* --- POPRAWA: Wybór Płci (Radio) - Wyraźniejsza czcionka --- */
         div[role="radiogroup"] label {
             background-color: #1A1A1A !important;
-            border: 1px solid #333 !important;
-            padding: 10px 12px !important;
-            border-radius: 6px !important;
-            margin-bottom: 6px !important;
-            transition: all 0.2s ease-in-out;
+            border: 1px solid #444 !important; /* Jaśniejsza ramka */
+            padding: 12px 15px !important; /* Większy przycisk */
+            border-radius: 8px !important;
+            margin-bottom: 8px !important;
         }
         
+        /* Tekst niezaznaczony - TERAZ JAŚNIEJSZY */
         div[role="radiogroup"] label p {
-            font-size: 13px !important;
-            color: #BBBBBB !important; 
-            font-weight: 500 !important;
+            font-size: 15px !important; /* Większa czcionka */
+            color: #FFFFFF !important; /* Czysta biel */
+            font-weight: 600 !important; /* Pogrubienie */
         }
 
+        /* Stan zaznaczony */
         div[role="radiogroup"] label:has(input:checked) {
             background-color: #D4AF37 !important;
-            border-color: #D4AF37 !important;
-            transform: scale(1.02);
+            border-color: #FFD700 !important;
         }
         
         div[role="radiogroup"] label:has(input:checked) p {
             color: #000000 !important;
-            font-weight: 800 !important;
+            font-weight: 900 !important; /* Extra Bold */
         }
         
         div[role="radiogroup"] label div[data-baseweb="radio"] { display: none; }
 
-        div[data-testid="stSlider"] label p { color: #FFF !important; font-size: 13px; }
-        div[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p { color: #D4AF37 !important; font-weight:700; }
+        /* --- POPRAWA: Suwak (Slider) --- */
+        div[data-testid="stSlider"] label {
+             color: #D4AF37 !important;
+             font-weight: bold;
+             font-size: 14px;
+        }
+        /* Liczby nad suwakiem */
+        div[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p { 
+            color: #FFF !important; 
+            font-weight: 700;
+            font-size: 16px !important;
+        }
+        /* Sam suwak */
         div[data-testid="stSlider"] .st-ae { background-color: #D4AF37 !important; }
 
+        /* Karty Perfum */
         .perfume-container {
             margin-bottom: 20px;
             padding-bottom: 20px;
@@ -103,7 +118,7 @@ def load_custom_css():
             flex-grow: 1;
             background-color: #161616;
             border: 1px solid #333;
-            border-left: 3px solid #D4AF37;
+            border-left: 4px solid #D4AF37;
             padding: 15px;
             border-radius: 4px;
             display: flex;
@@ -111,7 +126,7 @@ def load_custom_css():
         }
         .name-text {
             font-family: 'Playfair Display', serif;
-            font-size: 18px;
+            font-size: 20px; /* Większa nazwa */
             color: #FFF;
             font-weight: 600;
             line-height: 1.2;
@@ -120,7 +135,7 @@ def load_custom_css():
         .box-rating {
             background-color: #D4AF37;
             color: #000;
-            min-width: 70px;
+            min-width: 75px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -129,62 +144,109 @@ def load_custom_css():
             padding: 5px;
         }
         .rating-num {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 800;
         }
         .rating-sub {
-            font-size: 9px;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
         }
 
         .notes-row {
-            font-size: 11px;
-            color: #888;
+            font-size: 12px;
+            color: #AAA; /* Jaśniejszy szary */
             margin-bottom: 10px;
             padding-left: 5px;
+            line-height: 1.4;
         }
         .note-highlight {
-            color: #CCC;
-            font-style: italic;
+            color: #D4AF37; /* Złoty kolor nut */
+            font-style: normal;
+            font-weight: 600;
         }
 
         .fragrantica-link {
             display: block;
             text-align: right;
-            font-size: 10px;
-            color: #D4AF37;
+            font-size: 11px;
+            color: #FFF;
             text-decoration: none;
             font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
+            border: 1px solid #333;
+            padding: 8px;
+            background: #111;
+            border-radius: 4px;
         }
         .fragrantica-link:hover {
-            text-decoration: underline;
+            background: #222;
+            border-color: #D4AF37;
         }
         </style>
     """, unsafe_allow_html=True)
 
-# --- 4. Funkcje pomocnicze ---
+# --- 4. Funkcje pomocnicze (Agresywne czyszczenie) ---
 def parse_accords_safe(row_data):
+    """Czyści dane, usuwając nawiasy [' '] i zwraca czystą listę."""
+    if pd.isna(row_data): return []
+    
+    # Krok 1: Zamiana na string
+    s = str(row_data)
+    
+    # Krok 2: Jeśli wygląda jak lista Pythona, spróbuj sparsować
     try:
-        if pd.isna(row_data): return []
-        if str(row_data).strip().startswith("["):
-            try:
-                parsed = ast.literal_eval(str(row_data))
-                if isinstance(parsed, list):
-                    return [str(item).strip().lower() for item in parsed]
-            except:
-                pass
-        
-        clean_text = re.sub(r"[\[\]'\"]", "", str(row_data))
-        return [item.strip().lower() for item in clean_text.split(",") if item.strip()]
+        if s.strip().startswith("["):
+            parsed = ast.literal_eval(s)
+            if isinstance(parsed, list):
+                return [str(i).lower() for i in parsed]
     except:
-        return []
+        pass
+
+    # Krok 3: Jeśli parsowanie zawiodło, użyj siły (Regex)
+    # Usuń nawiasy kwadratowe, cudzysłowy pojedyncze i podwójne
+    s = re.sub(r"[\[\]'\"/]", "", s)
+    
+    # Rozdziel po przecinkach i usuń spacje
+    return [item.strip().lower() for item in s.split(",") if item.strip()]
+
+# --- 5. Ładowanie Danych ---
+@st.cache_data
+def load_data(filepath): 
+    try:
+        df = pd.read_csv(filepath)
+        df.rename(columns={'Name': 'name', 'Gender': 'gender', 'Rating Value': 'score', 'Rating Count': 'ratings', 'Main Accords': 'main_accords', 'url': 'img_link'}, inplace=True)
+        
+        # Czyszczenie nazwy
+        if 'name' in df.columns and 'gender' in df.columns:
+            df['name'] = df.apply(
+                lambda row: str(row['name']).replace(str(row['gender']), '').strip() 
+                if pd.notna(row['name']) and pd.notna(row['gender']) else row['name'], axis=1
+            )
+        
+        gender_map = {'for women': 'Female', 'for men': 'Male', 'for women and men': 'Unisex'}
+        df['gender'] = df['gender'].map(gender_map)
+        df.dropna(subset=['main_accords', 'name', 'img_link', 'gender'], inplace=True)
+        
+        if df['score'].dtype == 'object':
+            df['score'] = df['score'].str.replace(',', '.').astype(float)
+            
+        df['clean_accords'] = df['main_accords'].apply(parse_accords_safe)
+        
+        all_accords = set()
+        for accords_list in df['clean_accords']:
+            for note in accords_list:
+                all_accords.add(note)
+        
+        return df, sorted(list(all_accords))
+    except Exception:
+        return None, []
 
 def render_modular_card(perfume):
+    # Wyświetl tylko 5 pierwszych nut, połączone przecinkiem
     notes_list = perfume.clean_accords[:5]
-    notes_str = ", ".join(notes_list) if notes_list else "N/A"
+    notes_str = ", ".join(notes_list).upper() if notes_list else "N/A"
 
     html = f"""
     <div class="perfume-container">
@@ -199,63 +261,22 @@ def render_modular_card(perfume):
         </div>
         
         <div class="notes-row">
-            NOTES: <span class="note-highlight">{notes_str}</span>
+            MAIN NOTES: <span class="note-highlight">{notes_str}</span>
         </div>
         
         <a href="{perfume.img_link}" target="_blank" class="fragrantica-link">
-            VIEW ON FRAGRANTICA ↗
+            View Details on Fragrantica
         </a>
     </div>
     """
     st.markdown(html, unsafe_allow_html=True)
 
-# --- 5. Ladowanie Danych (To tu byl blad) ---
-@st.cache_data
-def load_data(filepath): 
-    try:
-        df = pd.read_csv(filepath)
-        # Zmiana nazw kolumn
-        df.rename(columns={'Name': 'name', 'Gender': 'gender', 'Rating Value': 'score', 'Rating Count': 'ratings', 'Main Accords': 'main_accords', 'url': 'img_link'}, inplace=True)
-        
-        # Czyszczenie nazwy
-        if 'name' in df.columns and 'gender' in df.columns:
-            df['name'] = df.apply(
-                lambda row: str(row['name']).replace(str(row['gender']), '').strip() 
-                if pd.notna(row['name']) and pd.notna(row['gender']) else row['name'], axis=1
-            )
-        
-        # Mapowanie plci
-        gender_map = {'for women': 'Female', 'for men': 'Male', 'for women and men': 'Unisex'}
-        df['gender'] = df['gender'].map(gender_map)
-        
-        # Usuwanie pustych
-        df.dropna(subset=['main_accords', 'name', 'img_link', 'gender'], inplace=True)
-        
-        # Naprawa formatu liczb (zamiana przecinka na kropke)
-        if df['score'].dtype == 'object':
-            df['score'] = df['score'].str.replace(',', '.').astype(float)
-            
-        # Parsowanie akordow
-        df['clean_accords'] = df['main_accords'].apply(parse_accords_safe)
-        
-        # Zbieranie unikalnych nut
-        all_accords = set()
-        for accords_list in df['clean_accords']:
-            for note in accords_list:
-                all_accords.add(note)
-        
-        return df, sorted(list(all_accords))
-    except Exception as e:
-        # W razie bledu zwroc puste wartosci
-        return None, []
-
-# --- 6. Glowna Aplikacja ---
+# --- 6. Główna Aplikacja ---
 load_custom_css()
 df, unique_accords = load_data("fra_perfumes.csv")
 
 if df is not None:
     
-    # Sidebar
     with st.sidebar:
         st.markdown("### FILTER SEARCH")
         st.write("")
@@ -267,15 +288,15 @@ if df is not None:
         
         st.markdown("---")
         st.markdown("**SCENT NOTES**")
-        notes = st.multiselect("scent_notes", unique_accords, placeholder="Type ingredient...", label_visibility="collapsed")
+        notes = st.multiselect("scent_notes", unique_accords, placeholder="Select ingredients...", label_visibility="collapsed")
         
-        st.markdown("<br><br><div style='color:#444; font-size:10px'>© 2024 Portfolio</div>", unsafe_allow_html=True)
+        st.markdown("<br><br><div style='color:#666; font-size:10px'>© 2024 Perfume Analytics</div>", unsafe_allow_html=True)
 
-    # Main Content
-    st.markdown("<h1 style='text-align: center; font-family: Playfair Display; color: #D4AF37; margin-bottom: 0;'>PERFUME FINDER</h1>", unsafe_allow_html=True)
-    st.markdown("<div style='text-align: center; color: #666; font-size: 11px; margin-bottom: 30px; letter-spacing: 2px;'>LUXURY DATABASE</div>", unsafe_allow_html=True)
+    # Nagłówek
+    st.markdown("<h1 style='text-align: center; font-family: Playfair Display; color: #D4AF37; margin-bottom: 0; font-size: 40px;'>PERFUME FINDER</h1>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; color: #888; font-size: 12px; margin-bottom: 40px; letter-spacing: 3px; text-transform: uppercase;'>Data-Driven Fragrance Discovery</div>", unsafe_allow_html=True)
 
-    # Logic
+    # Logika filtrowania
     if gender == "All":
         filtered = df.copy()
     else:
@@ -288,14 +309,14 @@ if df is not None:
             return all(note in row_list for note in notes)
         filtered = filtered[filtered['clean_accords'].apply(check_notes)]
 
-    # Results
-    st.markdown(f"<div style='color: #888; font-size: 12px; margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 5px;'>FOUND {len(filtered)} MATCHES</div>", unsafe_allow_html=True)
+    # Wyniki
+    st.markdown(f"<div style='color: #FFF; font-size: 14px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;'>FOUND <b>{len(filtered)}</b> MATCHING PERFUMES</div>", unsafe_allow_html=True)
 
     if filtered.empty:
-        st.info("No perfumes found.")
+        st.info("No perfumes found matching these criteria. Try lowering the rating or changing gender.")
     else:
         for row in filtered.head(50).itertuples():
             render_modular_card(row)
 
 else:
-    st.error("Data Error. Please check if fra_perfumes.csv exists.")
+    st.error("Data Error. Please check fra_perfumes.csv")
