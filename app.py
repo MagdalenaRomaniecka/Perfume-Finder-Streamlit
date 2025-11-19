@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import re
+import ast
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -10,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- CSS: Modern Chips, Clean Text, High Visibility Slider ---
+# --- CSS: High Contrast Selection ---
 def load_custom_css():
     st.markdown("""
         <style>
@@ -23,136 +24,82 @@ def load_custom_css():
             background-color: #0E0E0E; 
         }
         [data-testid="stAppViewContainer"] { background-color: #0E0E0E; }
-        [data-testid="stHeader"] { display: none; } /* Hide Header */
-        
+        [data-testid="stHeader"] { background-color: #0E0E0E; }
+
         /* --- SIDEBAR STYLING --- */
         section[data-testid="stSidebar"] {
             background-color: #111; 
             border-right: 1px solid #333;
         }
         
-        /* Sidebar Headers */
-        .sidebar-header {
-            color: #D4AF37;
-            font-family: 'Montserrat', sans-serif; /* Clean font for labels */
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-top: 20px;
-            margin-bottom: 10px;
+        /* Sidebar Titles */
+        .stSidebar .stMarkdown h1, .stSidebar .stMarkdown h2, .stSidebar .stMarkdown h3 {
+            color: #D4AF37 !important;
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 10px !important;
         }
 
-        /* --- MODERN "CHIPS" (PILLS) FOR GENDER SELECTION --- */
-        /* Zamieniamy zwykłe Radio Buttons na nowoczesne "Pastylki" */
+        /* --- RADIO BUTTONS (GENDER) - CONTRAST FIX --- */
         
-        div[role="radiogroup"] {
-            flex-direction: row; /* Align horizontally */
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
+        /* 1. Wygląd ogólny przycisku */
         div[role="radiogroup"] label {
-            background-color: transparent !important;
-            border: 1px solid #444 !important;
-            border-radius: 20px !important; /* Rounded Pill Shape */
-            padding: 6px 16px !important;
-            margin: 0 !important;
-            transition: all 0.2s ease;
-            width: auto !important;
-            flex: 1; /* Distribute space evenly */
-            display: flex;
-            justify-content: center;
+            background-color: #1A1A1A !important;
+            border: 1px solid #333 !important;
+            padding: 10px 12px !important;
+            border-radius: 6px !important;
+            margin-bottom: 6px !important;
+            transition: all 0.2s ease-in-out;
         }
         
-        div[role="radiogroup"] label:hover {
-            border-color: #D4AF37 !important;
-            cursor: pointer;
-        }
-
+        /* 2. Tekst w stanie spoczynku (Szary/Biały) */
         div[role="radiogroup"] label p {
-            font-size: 12px !important;
-            font-weight: 600 !important;
-            color: #AAA !important;
+            font-size: 13px !important;
+            color: #BBBBBB !important; 
+            font-weight: 500 !important;
         }
 
-        /* SELECTED STATE (High Visibility) */
+        /* 3. STAN ZAZNACZONY (SELECTED) - ZŁOTE TŁO, CZARNY TEKST */
         div[role="radiogroup"] label:has(input:checked) {
-            background-color: #D4AF37 !important; /* Gold Fill */
+            background-color: #D4AF37 !important; /* Gold Background */
             border-color: #D4AF37 !important;
-        }
-        div[role="radiogroup"] label:has(input:checked) p {
-            color: #000000 !important; /* Black Text */
-            font-weight: 700 !important;
+            transform: scale(1.02); /* Slight pop effect */
         }
         
-        /* Hide the default radio circle */
+        /* KRYTYCZNE: Kolor tekstu po zaznaczeniu */
+        div[role="radiogroup"] label:has(input:checked) p {
+            color: #000000 !important; /* BLACK TEXT ON GOLD */
+            font-weight: 800 !important; /* EXTRA BOLD */
+        }
+        
+        /* Ukrycie kółka radiowego */
         div[role="radiogroup"] label div[data-baseweb="radio"] { display: none; }
 
 
-        /* --- VISIBLE SLIDER --- */
-        div[data-testid="stSlider"] {
-            padding-top: 10px;
-        }
-        /* The numbers above the slider */
-        div[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p {
-            color: #FFFFFF !important;
-            font-size: 14px;
-            font-weight: 700;
-        }
-        /* The slider track */
-        div[data-testid="stSlider"] .st-ae {
-            background-color: #D4AF37 !important; /* Gold Track */
-        }
-        /* The thumb (handle) */
-        div[data-testid="stSlider"] div[role="slider"] {
-            background-color: #FFF !important; /* White Handle */
-            border: 2px solid #D4AF37 !important;
-            height: 20px;
-            width: 20px;
-        }
+        /* --- SLIDER --- */
+        div[data-testid="stSlider"] label p { color: #FFF !important; font-size: 13px; }
+        div[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p { color: #D4AF37 !important; font-weight:700; }
+        div[data-testid="stSlider"] .st-ae { background-color: #D4AF37 !important; }
 
-        /* --- MULTISELECT (NOTES) --- */
-        .stMultiSelect label p { display: none; } /* Hide default label */
-        .stMultiSelect div[data-baseweb="select"] > div {
-            background-color: #1A1A1A;
-            border-color: #444;
-            color: white;
-            border-radius: 8px;
-        }
-        /* Selected Tags */
-        .stMultiSelect span[data-baseweb="tag"] {
-            background-color: #333 !important;
-            border: 1px solid #D4AF37;
-        }
-        .stMultiSelect span[data-baseweb="tag"] span {
-            color: #D4AF37 !important;
-        }
-
-        /* --- CARD DESIGN: MODULAR SQUARES (CLEAN TEXT) --- */
+        /* --- CARD DESIGN: SEPARATE SQUARES --- */
         .perfume-container {
-            background-color: #161616;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            padding-bottom: 20px;
+            border-bottom: 1px solid #222;
         }
 
-        /* Flex Layout for Name and Score */
-        .card-header {
+        .info-row {
             display: flex;
-            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
             align-items: stretch;
-            gap: 15px;
-            margin-bottom: 15px;
         }
 
-        /* Left Box: Name */
+        /* Square 1: Name */
         .box-name {
-            flex: 1;
-            background-color: #0A0A0A;
-            border-left: 4px solid #D4AF37;
+            flex-grow: 1;
+            background-color: #161616;
+            border: 1px solid #333;
+            border-left: 3px solid #D4AF37;
             padding: 15px;
             border-radius: 4px;
             display: flex;
@@ -166,106 +113,91 @@ def load_custom_css():
             line-height: 1.2;
         }
 
-        /* Right Box: Score */
+        /* Square 2: Rating */
         .box-rating {
             background-color: #D4AF37;
             color: #000;
-            min-width: 65px;
-            border-radius: 4px;
+            min-width: 70px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            border-radius: 4px;
             padding: 5px;
         }
         .rating-num {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 800;
         }
-        .rating-lbl {
-            font-size: 8px;
-            font-weight: 700;
+        .rating-sub {
+            font-size: 9px;
+            font-weight: 600;
             text-transform: uppercase;
         }
 
-        /* Notes Area */
-        .notes-area {
-            border-top: 1px solid #333;
-            padding-top: 10px;
-            margin-bottom: 15px;
+        /* Notes section */
+        .notes-row {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 10px;
+            padding-left: 5px;
         }
-        .notes-label {
-            font-size: 10px;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-        .notes-text {
-            font-size: 12px;
+        .note-highlight {
             color: #CCC;
-            line-height: 1.5;
             font-style: italic;
         }
 
         /* Link Button */
-        .fragrantica-btn {
+        .fragrantica-link {
             display: block;
-            width: 100%;
-            text-align: center;
-            background-color: transparent;
-            border: 1px solid #444;
-            color: #D4AF37;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            padding: 10px 0;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: 0.2s;
-        }
-        .fragrantica-btn:hover {
-            background-color: #D4AF37;
-            color: #000;
-            border-color: #D4AF37;
-        }
-
-        /* Main Title */
-        .app-title {
-            text-align: center;
-            font-family: 'Playfair Display', serif;
-            color: #D4AF37;
-            font-size: 26px; /* Smaller, elegant */
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-        .app-subtitle {
-            text-align: center;
-            color: #666;
+            text-align: right;
             font-size: 10px;
-            letter-spacing: 3px;
+            color: #D4AF37;
+            text-decoration: none;
+            font-weight: 700;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            margin-bottom: 30px;
+        }
+        .fragrantica-link:hover {
+            text-decoration: underline;
         }
         </style>
     """, unsafe_allow_html=True)
 
-# --- Data Loading & ULTRA CLEANING ---
+# --- Helper: Advanced Accord Cleaning ---
+def parse_accords_safe(row_data):
+    """Robustly converts string representation of list to clean list."""
+    try:
+        if pd.isna(row_data): return []
+        # If it looks like a list structure "['a','b']"
+        if str(row_data).strip().startswith("["):
+            try:
+                parsed = ast.literal_eval(str(row_data))
+                if isinstance(parsed, list):
+                    return [str(item).strip().lower() for item in parsed]
+            except:
+                pass
+        
+        # Fallback: Regex cleaning
+        clean_text = re.sub(r"[\[\]'\"]", "", str(row_data))
+        return [item.strip().lower() for item in clean_text.split(",") if item.strip()]
+    except:
+        return []
+
+# --- Data Loading ---
 @st.cache_data
-def load_data(filepath, cache_buster_v45): 
+def load_data(filepath, cache_buster_contrast_fix): 
     try:
         df = pd.read_csv(filepath)
         df.rename(columns={'Name': 'name', 'Gender': 'gender', 'Rating Value': 'score', 'Rating Count': 'ratings', 'Main Accords': 'main_accords', 'url': 'img_link'}, inplace=True)
         
-        # Fix Names
+        # Fix names
         if 'name' in df.columns and 'gender' in df.columns:
             df['name'] = df.apply(
                 lambda row: str(row['name']).replace(str(row['gender']), '').strip() 
                 if pd.notna(row['name']) and pd.notna(row['gender']) else row['name'], axis=1
             )
         
-        # Map Gender
         gender_map = {'for women': 'Female', 'for men': 'Male', 'for women and men': 'Unisex'}
         df['gender'] = df['gender'].map(gender_map)
         df.dropna(subset=['main_accords', 'name', 'img_link', 'gender'], inplace=True)
@@ -273,52 +205,43 @@ def load_data(filepath, cache_buster_v45):
         if df['score'].dtype == 'object':
             df['score'] = df['score'].str.replace(',', '.').astype(float)
             
-        # Get Unique Accords (Cleaned)
+        # Apply clean parsing
+        df['clean_accords'] = df['main_accords'].apply(parse_accords_safe)
+        
         all_accords = set()
-        for accords_str in df['main_accords'].dropna():
-            if isinstance(accords_str, str):
-                # REGEX CLEANING: Keep only letters and spaces
-                clean_text = re.sub(r"[^a-zA-Z, ]", "", accords_str)
-                for item in clean_text.split(","):
-                    item = item.strip().lower()
-                    if item: all_accords.add(item)
+        for accords_list in df['clean_accords']:
+            for note in accords_list:
+                all_accords.add(note)
         
         return df, sorted(list(all_accords))
     except Exception:
         return None, []
 
-def render_card(perfume):
-    """Renders the modular card."""
+def render_modular_card(perfume):
+    """Renders separate boxes for Name and Rating."""
     
-    # Clean notes for DISPLAY
-    notes_display = "N/A"
-    if isinstance(perfume.main_accords, str):
-        # 1. Remove brackets and quotes
-        clean_text = re.sub(r"[\[\]'\"]", "", perfume.main_accords)
-        # 2. Split and clean individual words
-        words = [w.strip().lower() for w in clean_text.split(",") if w.strip()]
-        # 3. Join with stylish separator
-        notes_display = " • ".join(words[:5]) # Top 5
+    # Use the pre-cleaned list from dataframe
+    notes_list = perfume.clean_accords[:5] # Top 5
+    notes_str = ", ".join(notes_list) if notes_list else "N/A"
 
     html = f"""
     <div class="perfume-container">
-        <div class="card-header">
+        <div class="info-row">
             <div class="box-name">
                 <div class="name-text">{perfume.name}</div>
             </div>
             <div class="box-rating">
                 <div class="rating-num">{perfume.score:.1f}</div>
-                <div class="rating-lbl">SCORE</div>
+                <div class="rating-sub">SCORE</div>
             </div>
         </div>
         
-        <div class="notes-area">
-            <div class="notes-label">Key Notes</div>
-            <div class="notes-text">{notes_display}</div>
+        <div class="notes-row">
+            NOTES: <span class="note-highlight">{notes_str}</span>
         </div>
         
-        <a href="{perfume.img_link}" target="_blank" class="fragrantica-btn">
-            VIEW ON FRAGRANTICA
+        <a href="{perfume.img_link}" target="_blank" class="fragrantica-link">
+            VIEW ON FRAGRANTICA ↗
         </a>
     </div>
     """
@@ -326,38 +249,33 @@ def render_card(perfume):
 
 # --- Main Logic ---
 load_custom_css()
-df, unique_accords = load_data("fra_perfumes.csv", cache_buster_v45="v45")
+df, unique_accords = load_data("fra_perfumes.csv", cache_buster_contrast_fix="v_contrast_fix")
 
 if df is not None:
     
-    # --- SIDEBAR (FILTERS) ---
+    # --- SIDEBAR ---
     with st.sidebar:
-        st.markdown("<div style='text-align:center; margin-bottom:20px; color:#FFF; font-weight:bold; letter-spacing:2px;'>FILTERS</div>", unsafe_allow_html=True)
-        
-        # 1. GENDER (CHIPS UI)
-        st.markdown('<div class="sidebar-header">1. CATEGORY</div>', unsafe_allow_html=True)
-        # Using "All" as first option is standard UX
-        gender = st.radio("gender_hidden", ["All", "Female", "Male", "Unisex"], horizontal=True, label_visibility="collapsed")
+        st.markdown("### FILTER SEARCH")
         
         st.write("")
+        # Gender (Using Radio with Custom CSS for Highlight)
+        gender = st.radio("GENDER", ["All", "Female", "Male", "Unisex"], label_visibility="collapsed")
         
-        # 2. NOTES (Moved up as requested)
-        st.markdown('<div class="sidebar-header">2. SCENT NOTES</div>', unsafe_allow_html=True)
-        notes = st.multiselect("notes_hidden", unique_accords, placeholder="Select ingredients...", label_visibility="collapsed")
+        st.markdown("---")
+        st.markdown("**MIN RATING**")
+        score = st.slider("min_rating", 1.0, 5.0, 4.0, 0.1, label_visibility="collapsed")
         
-        st.write("")
+        st.markdown("---")
+        st.markdown("**SCENT NOTES**")
+        notes = st.multiselect("scent_notes", unique_accords, placeholder="Type ingredient...", label_visibility="collapsed")
         
-        # 3. RATING (Bottom)
-        st.markdown('<div class="sidebar-header">3. MIN RATING</div>', unsafe_allow_html=True)
-        score = st.slider("score_hidden", 1.0, 5.0, 4.0, 0.1, label_visibility="collapsed")
+        st.markdown("<br><br><div style='color:#444; font-size:10px'>© 2024 Portfolio</div>", unsafe_allow_html=True)
 
-        st.markdown("<br><br><div style='color:#444; font-size:9px; text-align:center'>© 2024 Portfolio</div>", unsafe_allow_html=True)
+    # --- MAIN AREA ---
+    st.markdown("<h1 style='text-align: center; font-family: Playfair Display; color: #D4AF37; margin-bottom: 0;'>PERFUME FINDER</h1>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; color: #666; font-size: 11px; margin-bottom: 30px; letter-spacing: 2px;'>LUXURY DATABASE</div>", unsafe_allow_html=True)
 
-    # --- MAIN CONTENT ---
-    st.markdown('<div class="app-title">PERFUME FINDER</div>', unsafe_allow_html=True)
-    st.markdown('<div class="app-subtitle">LUXURY DATABASE</div>', unsafe_allow_html=True)
-
-    # Logic
+    # Filtering
     if gender == "All":
         filtered = df.copy()
     else:
@@ -366,24 +284,19 @@ if df is not None:
     filtered = filtered[filtered['score'] >= score]
     
     if notes:
-        def check_notes(row_str):
-            if pd.isna(row_str): return False
-            # Clean logic for search
-            row_clean = re.sub(r"[^a-zA-Z, ]", "", str(row_str)).lower()
-            return all(note in row_clean for note in notes)
-        filtered = filtered[filtered['main_accords'].apply(check_notes)]
+        # Check against the clean list column
+        def check_notes(row_list):
+            return all(note in row_list for note in notes)
+        filtered = filtered[filtered['clean_accords'].apply(check_notes)]
 
     # Results
-    st.markdown(f"<div style='color: #D4AF37; font-size: 11px; text-align: center; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px;'>FOUND {len(filtered)} MATCHES</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='color: #888; font-size: 12px; margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 5px;'>FOUND {len(filtered)} MATCHES</div>", unsafe_allow_html=True)
 
     if filtered.empty:
         st.info("No perfumes found.")
     else:
-        # 2 Columns Grid for Desktop, Stacks on Mobile
-        cols = st.columns(2)
-        for i, row in enumerate(filtered.head(40).itertuples()):
-            with cols[i % 2]:
-                render_card(row)
+        for row in filtered.head(50).itertuples():
+            render_modular_card(row)
 
 else:
-    st.error("Data Error")
+    st.error("Data Error.")
