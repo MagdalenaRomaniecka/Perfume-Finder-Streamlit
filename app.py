@@ -3,6 +3,7 @@ import pandas as pd
 import re
 import streamlit.components.v1 as components
 
+# --- PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="Perfume Finder",
     page_icon="💎",
@@ -10,6 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- ANALYTICS INJECTION (GA4) ---
 def inject_ga4():
     GA_ID = "G-S5NLHL3KFM"
     ga_code = f"""
@@ -25,23 +27,32 @@ def inject_ga4():
 
 inject_ga4()
 
+# --- DATA CLEANING HELPERS ---
 def brutal_clean(text):
     if pd.isna(text): return []
     text = str(text)
     text = re.sub(r"[^a-zA-Z, ]", "", text)
     return [x.strip().upper() for x in text.split(",") if x.strip()]
 
+def generate_stars(score):
+    full_stars = int(score)
+    empty_stars = 5 - full_stars
+    return "★" * full_stars + "☆" * empty_stars
+
+# --- CSS STYLING ---
 def load_custom_css():
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Cinzel:wght@500;700&display=swap');
 
+        /* Global Background */
         [data-testid="stAppViewContainer"] {
             background: radial-gradient(circle at 50% 20%, #1a1a2e 0%, #000000 100%);
             color: #E0E0E0;
         }
         [data-testid="stHeader"] { display: none; }
 
+        /* Title Box */
         .title-box {
             border-top: 4px solid #D4AF37;
             border-bottom: 4px solid #D4AF37;
@@ -69,6 +80,7 @@ def load_custom_css():
             text-transform: uppercase;
         }
 
+        /* Glassmorphism Card */
         .perfume-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(212, 175, 55, 0.2);
@@ -94,11 +106,11 @@ def load_custom_css():
         .card-img {
             width: 85px;
             height: 85px;
-            object-fit: contain;
+            object-fit: cover;
             background: #FFF;
             border-radius: 50%;
-            padding: 5px;
-            border: 2px solid #222;
+            padding: 2px;
+            border: 2px solid #D4AF37;
         }
 
         .card-content { flex-grow: 1; }
@@ -123,9 +135,10 @@ def load_custom_css():
             text-align: center;
             border-left: 1px solid #333;
             padding-left: 20px;
-            min-width: 70px;
+            min-width: 90px;
         }
         .score-val { font-size: 24px; font-weight: 700; color: #D4AF37; }
+        .score-stars { color: #D4AF37; font-size: 14px; letter-spacing: 1px; margin-top: 5px; }
         .score-label { font-size: 9px; color: #666; letter-spacing: 1px; margin-top: 2px; }
 
         .card-link {
@@ -141,6 +154,7 @@ def load_custom_css():
         }
         .card-link:hover { color: #D4AF37; border-color: #D4AF37; }
 
+        /* Sidebar Styling */
         section[data-testid="stSidebar"] {
             background-color: #050505;
             border-right: 1px solid #222;
@@ -155,6 +169,7 @@ def load_custom_css():
         
         .stMultiSelect span { color: #E0E0E0; }
 
+        /* Mobile Responsiveness */
         @media only screen and (max-width: 600px) {
             .perfume-card { flex-direction: column; text-align: center; gap: 15px; padding: 15px; }
             .card-score { border-left: none; border-top: 1px solid #333; padding-top: 15px; padding-left: 0; width: 100%; }
@@ -164,24 +179,30 @@ def load_custom_css():
         </style>
     """, unsafe_allow_html=True)
 
+# --- DATA LOADING & PROCESSING ---
 @st.cache_data
 def load_data(filepath): 
     try:
         df = pd.read_csv(filepath)
         df.rename(columns={'Name': 'name', 'Gender': 'gender', 'Rating Value': 'score', 'Rating Count': 'ratings', 'Main Accords': 'main_accords', 'url': 'img_link'}, inplace=True)
         
+        # Name cleaning
         if 'name' in df.columns and 'gender' in df.columns:
             df['name'] = df.apply(lambda row: str(row['name']).replace(str(row['gender']), '').strip() if pd.notna(row['name']) else row['name'], axis=1)
         
+        # Gender mapping
         gender_map = {'for women': 'Female', 'for men': 'Male', 'for women and men': 'Unisex'}
         df['gender'] = df['gender'].map(gender_map)
         df.dropna(subset=['main_accords', 'name', 'gender'], inplace=True)
         
+        # Score cleaning
         if df['score'].dtype == 'object':
             df['score'] = df['score'].str.replace(',', '.').astype(float)
             
+        # Accord cleaning
         df['clean_accords'] = df['main_accords'].apply(brutal_clean)
         
+        # Extract unique notes
         all_accords = set()
         for accords_list in df['clean_accords']:
             for note in accords_list: all_accords.add(note)
@@ -194,11 +215,16 @@ def render_luxury_card(perfume):
     notes = perfume.clean_accords[:4]
     notes_str = " • ".join(notes) if notes else "Classic Blend"
     
-    img_url = perfume.img_link if pd.notna(perfume.img_link) else "https://cdn-icons-png.flaticon.com/512/3050/3050253.png"
+    img_url = perfume.img_link if pd.notna(perfume.img_link) else ""
+    # Fallback icon
+    fallback_img = "https://cdn-icons-png.flaticon.com/512/3050/3050253.png"
+    
+    stars = generate_stars(perfume.score)
 
     html = f"""
     <div class="perfume-card">
-        <img src="{img_url}" class="card-img" onerror="this.style.display='none'">
+        <img src="{img_url}" class="card-img" onerror="this.onerror=null; this.src='{fallback_img}';">
+        
         <div class="card-content">
             <div class="card-name">{perfume.name}</div>
             <div class="card-notes">
@@ -206,18 +232,22 @@ def render_luxury_card(perfume):
             </div>
             <a href="{img_url}" target="_blank" class="card-link">VIEW DETAILS</a>
         </div>
+        
         <div class="card-score">
             <div class="score-val">{perfume.score:.1f}</div>
+            <div class="score-stars">{stars}</div>
             <div class="score-label">RATING</div>
         </div>
     </div>
     """
     st.markdown(html, unsafe_allow_html=True)
 
+# --- MAIN APPLICATION LOGIC ---
 load_custom_css()
 df, unique_accords = load_data("fra_perfumes.csv")
 
 if df is not None:
+    # Sidebar
     with st.sidebar:
         st.markdown("### FIND YOUR SCENT")
         st.write("")
@@ -235,6 +265,7 @@ if df is not None:
         st.markdown("---")
         st.markdown("<div style='text-align:center; color:#444; font-size:10px'>DESIGNED BY MAGDALENA ROMANIECKA</div>", unsafe_allow_html=True)
 
+    # Main Content
     st.markdown("""
         <div class="title-box">
             <h1 class="main-title">Perfume Finder</h1>
@@ -242,6 +273,7 @@ if df is not None:
         </div>
     """, unsafe_allow_html=True)
 
+    # Filter Logic
     if gender == "All": filtered = df.copy()
     else: filtered = df[df['gender'] == gender].copy()
     
@@ -250,6 +282,7 @@ if df is not None:
     if notes:
         filtered = filtered[filtered['clean_accords'].apply(lambda x: all(n in x for n in notes))]
 
+    # Results Display
     st.markdown(f"<div style='text-align: center; color: #666; font-size: 12px; margin-bottom: 30px;'>DISCOVERED {len(filtered)} FRAGRANCES</div>", unsafe_allow_html=True)
 
     if filtered.empty:
