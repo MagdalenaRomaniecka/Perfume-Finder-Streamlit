@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. ANALYTICS (GA4) ---
+# --- 2. ANALYTICS ---
 def inject_ga4():
     GA_ID = "G-S5NLHL3KFM"
     ga_code = f"""
@@ -27,7 +27,7 @@ def inject_ga4():
 
 inject_ga4()
 
-# --- 3. DATA CLEANING ---
+# --- 3. DATA LOGIC ---
 def brutal_clean(text):
     if pd.isna(text): return []
     text = str(text)
@@ -43,87 +43,83 @@ def generate_stars(score):
     except:
         return "☆☆☆☆☆"
 
-# --- 4. CSS STYLING (STABLE & VISIBLE UI) ---
+def get_initials(name):
+    if not name: return "PF"
+    clean = re.sub(r"[^a-zA-Z0-9 ]", "", str(name))
+    words = clean.split()
+    if len(words) >= 2:
+        return (words[0][0] + words[1][0]).upper()
+    return clean[:2].upper()
+
+# --- 4. CSS STYLING (COMPACT & LUXURY) ---
 def load_custom_css():
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@600;700&display=swap');
 
-        /* MAIN BACKGROUND */
+        /* --- FIXED HEADER (KILL THE WHITE BAR) --- */
+        header, [data-testid="stHeader"] {
+            background-color: #0E0E0E !important;
+            border-bottom: 1px solid #333;
+        }
+        
+        /* --- MAIN APP BACKGROUND --- */
         .stApp {
             background-color: #0E0E0E !important;
-            background-image: radial-gradient(circle at 50% 0%, #1c1c1c 0%, #000000 100%) !important;
-            background-attachment: fixed !important;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #000000 100%) !important;
         }
 
-        /* --- BIGGER & VISIBLE SIDEBAR ARROW --- */
-        [data-testid="stSidebarCollapsedControl"] {
-            color: #D4AF37 !important;
-            background-color: rgba(212, 175, 55, 0.1) !important;
-            border: 1px solid #D4AF37 !important;
-            border-radius: 50% !important;
-            width: 50px !important; /* Bigger clickable area */
-            height: 50px !important;
-            transform: scale(1.2) !important; /* Visually larger */
-            margin-top: 20px !important;
-            margin-left: 20px !important;
-            z-index: 99999 !important;
-        }
-        [data-testid="stSidebarCollapsedControl"]:hover {
-            background-color: #D4AF37 !important;
-            color: #000 !important;
-        }
-
-        /* --- DROPDOWN MENU FIX (Notes Selector) --- */
-        /* Popover background */
-        div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
-            background-color: #0E0E0E !important;
-            border: 1px solid #333 !important;
-        }
-        /* Options text */
-        li[role="option"] {
-             background-color: #0E0E0E !important;
-             color: #E0E0E0 !important;
-        }
-        /* Hover/Selected */
-        li[role="option"]:hover, li[aria-selected="true"] {
-            background-color: #D4AF37 !important;
-            color: #000 !important;
-        }
-        /* Selected Tags */
-        span[data-baseweb="tag"] {
-            background-color: #222 !important;
-            color: #D4AF37 !important;
-            border: 1px solid #444 !important;
-        }
-
-        /* GLOBAL TYPOGRAPHY */
-        * { font-family: 'Montserrat', sans-serif; color: #E0E0E0; }
-        h1, h2, h3 { font-family: 'Playfair Display', serif; color: #D4AF37 !important; }
-        
-        /* METRIC STYLING (Rating) */
-        div[data-testid="stMetricValue"] {
-            color: #D4AF37 !important;
-            font-size: 24px !important;
-            font-family: 'Playfair Display', serif !important;
-        }
-        div[data-testid="stMetricLabel"] {
-            color: #888 !important;
-            font-size: 10px !important;
-            letter-spacing: 2px;
-        }
-        div[data-testid="stMetricDelta"] {
-            color: #D4AF37 !important;
-        }
-
-        /* SIDEBAR */
+        /* --- SIDEBAR COMPACTING --- */
         section[data-testid="stSidebar"] {
             background-color: #050505 !important;
             border-right: 1px solid #222;
         }
+        /* Reduce gap between widgets */
+        .stRadio, .stMultiSelect, .stSlider {
+            margin-bottom: -15px !important; /* Pull items closer */
+        }
+        /* Compact Radio Buttons */
+        div[role="radiogroup"] {
+            gap: 0px !important;
+        }
+        div[role="radiogroup"] label {
+            padding: 0px !important;
+            background: transparent !important;
+            border: none !important;
+        }
+        /* Sidebar Text */
+        .stMarkdown h2, .stMarkdown h3 {
+            font-size: 14px !important;
+            color: #D4AF37 !important;
+            margin-bottom: 5px !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- DROPDOWN FIX --- */
+        div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
+            background-color: #111 !important;
+        }
+        li[role="option"] { color: #E0E0E0 !important; }
+        li[role="option"]:hover { background-color: #D4AF37 !important; color: #000 !important; }
+
+        /* --- TYPOGRAPHY --- */
+        * { font-family: 'Montserrat', sans-serif; color: #E0E0E0; }
+        h1 { font-family: 'Playfair Display', serif; color: #D4AF37 !important; }
         
-        /* DIVIDER */
-        hr { margin: 2em 0; border-color: #333; }
+        /* --- NATIVE METRIC COLOR FIX --- */
+        div[data-testid="stMetricValue"] { color: #D4AF37 !important; }
+        div[data-testid="stMetricLabel"] { color: #888 !important; }
+
+        /* --- BIGGER ARROW --- */
+        [data-testid="stSidebarCollapsedControl"] {
+            color: #D4AF37 !important;
+            transform: scale(1.2);
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 5px;
+        }
+        
+        hr { border-color: #333; margin: 1em 0; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -154,74 +150,97 @@ def load_data(filepath):
     except:
         return None, []
 
-# --- 6. STABLE CARD RENDERER (NATIVE COMPONENTS) ---
-def render_native_card(perfume):
-    # Prepare Data
+# --- 6. RENDER CARD (GOLD SEAL EDITION) ---
+def render_gold_card(perfume):
     notes = perfume.clean_accords[:4]
     notes_str = " • ".join(notes) if notes else "Classic Blend"
     stars = generate_stars(perfume.score)
-    initial = perfume.name[0].upper() if perfume.name else "P"
+    initials = get_initials(perfume.name)
     
-    # NATIVE LAYOUT (Unbreakable)
     with st.container():
-        # Columns: Monogram(1) | Details(4) | Rating(2)
-        col1, col2, col3 = st.columns([1, 4, 2])
+        # Layout: Logo(1) | Content(3.5) | Score(1.5)
+        col1, col2, col3 = st.columns([1, 3.5, 1.5])
         
         with col1:
-            # Big Letter
-            st.markdown(f"<h1 style='text-align:center; font-size:42px; margin:0; color:#D4AF37;'>{initial}</h1>", unsafe_allow_html=True)
+            # THE GOLD SEAL (HTML styling for just the logo)
+            st.markdown(f"""
+            <div style="
+                width: 60px; height: 60px; 
+                border: 2px solid #D4AF37; 
+                border-radius: 50%; 
+                background-color: #000;
+                display: flex; align-items: center; justify-content: center;
+                font-family: 'Playfair Display'; font-size: 22px; color: #D4AF37;
+                box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+                margin: 0 auto;
+            ">
+                {initials}
+            </div>
+            """, unsafe_allow_html=True)
         
         with col2:
-            # Name & Notes
-            st.markdown(f"<h3 style='margin:0; font-size:18px; color:#FFF;'>{perfume.name}</h3>", unsafe_allow_html=True)
-            st.caption(f"NOTES: {notes_str}")
+            # NAME WITH UNDERLINE
+            st.markdown(f"""
+            <div style="border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 5px;">
+                <span style="font-family: 'Playfair Display'; font-size: 18px; color: #FFF; letter-spacing: 0.5px;">
+                    {perfume.name}
+                </span>
+            </div>
+            <div style="font-size: 10px; color: #AAA; text-transform: uppercase;">
+                <span style="color: #D4AF37; font-weight: bold;">NOTES:</span> {notes_str}
+            </div>
+            """, unsafe_allow_html=True)
             
             if pd.notna(perfume.img_link):
-                st.markdown(f"<a href='{perfume.img_link}' target='_blank' style='font-size:10px; color:#666; text-decoration:none;'>VIEW ON FRAGRANTICA ></a>", unsafe_allow_html=True)
+                st.markdown(f"<a href='{perfume.img_link}' target='_blank' style='font-size: 9px; color: #666; text-decoration: none;'>VIEW DETAILS ></a>", unsafe_allow_html=True)
 
         with col3:
-            # Metric
-            st.metric(label="RATING", value=f"{perfume.score:.1f}", delta=stars)
-            
-        # Divider Line
-        st.divider()
+            # STABLE METRIC
+            st.metric(label="SCORE", value=f"{perfume.score:.1f}", delta=stars)
+        
+        st.markdown("<hr style='margin: 15px 0; border-color: #222;'>", unsafe_allow_html=True)
 
 # --- 7. MAIN APP ---
 load_custom_css()
 df, unique_accords = load_data("fra_perfumes.csv")
 
 if df is not None:
-    # SIDEBAR
     with st.sidebar:
-        st.header("FIND YOUR SCENT")
-        gender = st.radio("AUDIENCE", ["All", "Female", "Male", "Unisex"])
-        st.write("---")
-        notes = st.multiselect("PREFERRED NOTES", unique_accords)
-        st.write("---")
-        score = st.slider("MIN RATING", 1.0, 5.0, 4.0, 0.1)
+        st.header("FILTERS")
+        
+        st.markdown("### AUDIENCE")
+        gender = st.radio("gender_select", ["All", "Female", "Male", "Unisex"], label_visibility="collapsed")
+        
+        st.write("")
+        st.markdown("### NOTES")
+        notes = st.multiselect("notes_select", unique_accords, placeholder="Select...", label_visibility="collapsed")
+        
+        st.write("")
+        st.markdown("### RATING")
+        score = st.slider("rating_slider", 1.0, 5.0, 4.0, 0.1, label_visibility="collapsed")
+        
         st.markdown("---")
-        st.caption("© 2024 Magdalena Romaniecka")
+        st.markdown("<div style='text-align:center; font-size:10px; color:#444'>© 2024 M. Romaniecka</div>", unsafe_allow_html=True)
 
     # HEADER
-    st.markdown("<h1 style='text-align:center; font-size: 42px; margin-bottom: 0;'>PERFUME FINDER</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#888; font-size:12px; letter-spacing:3px; margin-bottom:40px;'>EXCLUSIVE FRAGRANCE DATABASE</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align:center; margin-bottom: 0px;'>PERFUME FINDER</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#666; font-size:11px; letter-spacing:3px; margin-bottom:30px;'>LUXURY FRAGRANCE DATABASE</p>", unsafe_allow_html=True)
 
-    # FILTERS
+    # LOGIC
     if gender == "All": filtered = df.copy()
     else: filtered = df[df['gender'] == gender].copy()
     
     filtered = filtered[filtered['score'] >= score]
-    
     if notes:
         filtered = filtered[filtered['clean_accords'].apply(lambda x: all(n in x for n in notes))]
 
     # RESULTS
-    st.markdown(f"<center style='color:#666; font-size:12px; margin-bottom:30px;'>FOUND {len(filtered)} FRAGRANCES</center>", unsafe_allow_html=True)
+    st.markdown(f"<center style='color:#444; font-size:11px; margin-bottom:20px;'>{len(filtered)} RESULTS FOUND</center>", unsafe_allow_html=True)
 
     if filtered.empty:
-        st.warning("No perfumes found. Try adjusting your filters.")
+        st.warning("No perfumes found.")
     else:
         for row in filtered.head(40).itertuples():
-            render_native_card(row)
+            render_gold_card(row)
 else:
-    st.error("Error: Database not found.")
+    st.error("Error loading database.")
