@@ -51,14 +51,31 @@ def get_initials(name):
         return (words[0][0] + words[1][0]).upper()
     return clean[:2].upper()
 
-# --- 4. CSS STYLING (SAFE MODE) ---
+# --- 4. CSS STYLING ---
 def load_custom_css():
-    # Defined as a variable to prevent SyntaxError
-    styles = """
-    <style>
+    # Używamy zwykłego st.markdown, żeby uniknąć problemów ze zmiennymi
+    st.markdown("""
+        <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@600;700&display=swap');
 
-        /* --- ELEGANT TITLE FRAME --- */
+        /* BACKGROUND */
+        .stApp {
+            background-color: #0E0E0E !important;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #000000 100%) !important;
+            background-attachment: fixed !important;
+        }
+        
+        /* FONTS & COLORS */
+        * { font-family: 'Montserrat', sans-serif; color: #E0E0E0; }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; color: #D4AF37 !important; }
+        
+        /* REMOVE WHITE HEADER */
+        header, [data-testid="stHeader"] {
+            background-color: #0E0E0E !important;
+            border-bottom: 1px solid #333;
+        }
+
+        /* TITLE FRAME */
         .title-frame {
             border: 3px double #D4AF37;
             padding: 30px;
@@ -68,24 +85,44 @@ def load_custom_css():
             box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
         }
 
-        /* --- SIDEBAR --- */
+        /* DROPDOWN MENU FIX */
+        div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
+            background-color: #0E0E0E !important;
+            border: 1px solid #333 !important;
+        }
+        li[role="option"] {
+             background-color: #0E0E0E !important;
+             color: #E0E0E0 !important;
+        }
+        li[role="option"]:hover, li[role="option"][aria-selected="true"] {
+            background-color: #D4AF37 !important;
+            color: #000000 !important;
+        }
+        span[data-baseweb="tag"] {
+            background-color: #222 !important;
+            color: #D4AF37 !important;
+            border: 1px solid #444 !important;
+        }
+
+        /* SIDEBAR */
         section[data-testid="stSidebar"] {
             background-color: #050505 !important;
             border-right: 1px solid #222;
         }
-        .stSidebar h2, .stSidebar h3 {
-            font-family: 'Playfair Display', serif !important;
-            font-size: 12px !important;
+        .stRadio, .stMultiSelect, .stSlider { margin-bottom: -20px !important; }
+        .stSidebar label p { font-size: 11px !important; color: #AAA !important; }
+        
+        /* CUSTOM BUTTON */
+        a.fragrantica-btn {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 6px 12px;
+            border: 1px solid #D4AF37;
+            border-radius: 4px;
             color: #D4AF37 !important;
-            margin-bottom: 5px !important;
-            text-transform: uppercase;
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: bold;
             letter-spacing: 1px;
         }
-        .stSidebar label p {
-            font-size: 11px !important;
-            color: #AAA !important;
-        }
-        .stRadio, .stMultiSelect, .stSlider { margin-bottom: -20px !important; }
-        div[role="radiogroup"] { gap: 0px !important; }
-        
-        /* --- DROPDOWN FIX
+        a.fragrantica
