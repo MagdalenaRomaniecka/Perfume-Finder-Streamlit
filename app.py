@@ -3,7 +3,7 @@ import pandas as pd
 import re
 import streamlit.components.v1 as components
 
-# --- PAGE CONFIGURATION ---
+# --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="Perfume Finder",
     page_icon="💎",
@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- ANALYTICS INJECTION (GA4) ---
+# --- 2. ANALYTICS (GA4) ---
 def inject_ga4():
     GA_ID = "G-S5NLHL3KFM"
     ga_code = f"""
@@ -27,10 +27,11 @@ def inject_ga4():
 
 inject_ga4()
 
-# --- DATA CLEANING HELPERS ---
+# --- 3. DATA CLEANING ---
 def brutal_clean(text):
     if pd.isna(text): return []
     text = str(text)
+    # Remove all special characters except text and commas
     text = re.sub(r"[^a-zA-Z, ]", "", text)
     return [x.strip().upper() for x in text.split(",") if x.strip()]
 
@@ -39,170 +40,173 @@ def generate_stars(score):
     empty_stars = 5 - full_stars
     return "★" * full_stars + "☆" * empty_stars
 
-# --- CSS STYLING ---
+# --- 4. CSS STYLING (MONOGRAM EDITION) ---
 def load_custom_css():
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Cinzel:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@600;700&display=swap');
 
-        /* Global Background */
-        [data-testid="stAppViewContainer"] {
-            background: radial-gradient(circle at 50% 20%, #1a1a2e 0%, #000000 100%);
-            color: #E0E0E0;
+        /* Force Dark Background */
+        .stApp {
+            background-color: #0E0E0E !important;
+            background-image: radial-gradient(circle at 50% 0%, #1c1c1c 0%, #000000 100%) !important;
         }
-        [data-testid="stHeader"] { display: none; }
 
-        /* Title Box */
+        /* Hide Streamlit Elements */
+        [data-testid="stHeader"] { display: none; }
+        
+        /* Global Text Colors */
+        h1, h2, h3, p, label, span, div {
+            color: #E0E0E0 !important;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* TITLE SECTION */
         .title-box {
-            border-top: 4px solid #D4AF37;
-            border-bottom: 4px solid #D4AF37;
-            padding: 30px;
             text-align: center;
-            margin-bottom: 50px;
-            background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #333;
         }
         .main-title {
-            font-family: 'Cinzel', serif;
-            color: #D4AF37;
-            font-size: 36px;
-            letter-spacing: 6px;
+            font-family: 'Playfair Display', serif;
+            font-size: 38px !important;
+            color: #D4AF37 !important;
+            letter-spacing: 3px;
             margin: 0;
             text-transform: uppercase;
-            font-weight: 700;
         }
         .sub-title {
-            font-family: 'Montserrat', sans-serif;
-            color: #AAA;
-            font-size: 11px;
-            letter-spacing: 3px;
-            margin-top: 10px;
+            font-size: 10px !important;
+            color: #888 !important;
+            letter-spacing: 5px;
+            margin-top: 5px;
             text-transform: uppercase;
         }
 
-        /* Glassmorphism Card */
+        /* PERFUME CARD (Flexbox Layout) */
         .perfume-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 12px;
+            background-color: #121212;
+            border: 1px solid #333;
+            border-radius: 10px;
             padding: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 25px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            max-width: 750px;
-            margin-left: auto;
-            margin-right: auto;
+            gap: 20px;
+            transition: transform 0.2s;
         }
         .perfume-card:hover {
             border-color: #D4AF37;
-            background: rgba(255, 255, 255, 0.06);
+            background-color: #181818;
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
-        .card-img {
-            width: 85px;
-            height: 85px;
-            object-fit: cover;
-            background: #FFF;
-            border-radius: 50%;
-            padding: 2px;
+        /* MONOGRAM (Replaces Broken Images) */
+        .monogram {
+            width: 70px;
+            height: 70px;
+            min-width: 70px; /* Prevent shrinking */
+            background: #000;
             border: 2px solid #D4AF37;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 30px;
+            color: #D4AF37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
         }
 
-        .card-content { flex-grow: 1; }
-        
+        /* CONTENT SECTION */
+        .card-content {
+            flex-grow: 1;
+            overflow: hidden;
+        }
         .card-name {
-            font-family: 'Cinzel', serif;
-            font-size: 20px;
-            color: #FFF;
-            margin-bottom: 8px;
-            font-weight: 500;
+            font-family: 'Playfair Display', serif;
+            font-size: 18px !important;
+            color: #FFF !important;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        
         .card-notes {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 11px;
-            color: #BBB;
-            line-height: 1.6;
+            font-size: 11px !important;
+            color: #AAA !important;
+            line-height: 1.4;
         }
-        .highlight { color: #D4AF37; font-weight: 600; }
+        .highlight { color: #D4AF37 !important; font-weight: 600; }
 
-        .card-score {
+        /* RATING SECTION */
+        .card-rating {
             text-align: center;
+            min-width: 80px;
             border-left: 1px solid #333;
-            padding-left: 20px;
-            min-width: 90px;
+            padding-left: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
-        .score-val { font-size: 24px; font-weight: 700; color: #D4AF37; }
-        .score-stars { color: #D4AF37; font-size: 14px; letter-spacing: 1px; margin-top: 5px; }
-        .score-label { font-size: 9px; color: #666; letter-spacing: 1px; margin-top: 2px; }
-
-        .card-link {
-            display: inline-block;
-            font-size: 9px;
-            color: #888;
-            text-decoration: none;
-            margin-top: 10px;
-            border: 1px solid #333;
-            padding: 4px 10px;
-            border-radius: 20px;
-            transition: 0.3s;
-        }
-        .card-link:hover { color: #D4AF37; border-color: #D4AF37; }
-
-        /* Sidebar Styling */
-        section[data-testid="stSidebar"] {
-            background-color: #050505;
-            border-right: 1px solid #222;
-        }
-        
-        .stRadio label, .stMultiSelect label, .stSlider label {
+        .rating-val {
+            font-size: 22px !important;
             color: #D4AF37 !important;
-            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+        .rating-stars {
+            color: #D4AF37 !important;
             font-size: 12px !important;
             letter-spacing: 1px;
         }
-        
-        .stMultiSelect span { color: #E0E0E0; }
 
-        /* Mobile Responsiveness */
-        @media only screen and (max-width: 600px) {
-            .perfume-card { flex-direction: column; text-align: center; gap: 15px; padding: 15px; }
-            .card-score { border-left: none; border-top: 1px solid #333; padding-top: 15px; padding-left: 0; width: 100%; }
-            .main-title { font-size: 26px; letter-spacing: 3px; }
-            .card-img { width: 70px; height: 70px; }
+        /* SIDEBAR */
+        section[data-testid="stSidebar"] {
+            background-color: #080808 !important;
+            border-right: 1px solid #222;
+        }
+        .stRadio label, .stMultiSelect label, .stSlider label {
+            color: #D4AF37 !important;
+            font-size: 12px !important;
+        }
+
+        /* MOBILE FIXES */
+        @media (max-width: 600px) {
+            .perfume-card { flex-direction: column; text-align: center; }
+            .card-rating { border-left: none; border-top: 1px solid #333; padding-top: 15px; padding-left: 0; width: 100%; }
+            .monogram { margin: 0 auto; }
+            .card-name { white-space: normal; }
         }
         </style>
     """, unsafe_allow_html=True)
 
-# --- DATA LOADING & PROCESSING ---
+# --- 5. DATA LOADING ---
 @st.cache_data
 def load_data(filepath): 
     try:
         df = pd.read_csv(filepath)
         df.rename(columns={'Name': 'name', 'Gender': 'gender', 'Rating Value': 'score', 'Rating Count': 'ratings', 'Main Accords': 'main_accords', 'url': 'img_link'}, inplace=True)
         
-        # Name cleaning
+        # Name Logic
         if 'name' in df.columns and 'gender' in df.columns:
             df['name'] = df.apply(lambda row: str(row['name']).replace(str(row['gender']), '').strip() if pd.notna(row['name']) else row['name'], axis=1)
         
-        # Gender mapping
+        # Gender Logic
         gender_map = {'for women': 'Female', 'for men': 'Male', 'for women and men': 'Unisex'}
         df['gender'] = df['gender'].map(gender_map)
+        
+        # Cleanup
         df.dropna(subset=['main_accords', 'name', 'gender'], inplace=True)
         
-        # Score cleaning
+        # Score Logic
         if df['score'].dtype == 'object':
             df['score'] = df['score'].str.replace(',', '.').astype(float)
             
-        # Accord cleaning
+        # Accord Logic
         df['clean_accords'] = df['main_accords'].apply(brutal_clean)
         
-        # Extract unique notes
+        # Unique Notes
         all_accords = set()
         for accords_list in df['clean_accords']:
             for note in accords_list: all_accords.add(note)
@@ -211,69 +215,70 @@ def load_data(filepath):
     except:
         return None, []
 
-def render_luxury_card(perfume):
+def render_card(perfume):
+    # Extract Data
     notes = perfume.clean_accords[:4]
     notes_str = " • ".join(notes) if notes else "Classic Blend"
-    
-    img_url = perfume.img_link if pd.notna(perfume.img_link) else ""
-    # Fallback icon
-    fallback_img = "https://cdn-icons-png.flaticon.com/512/3050/3050253.png"
-    
     stars = generate_stars(perfume.score)
-
+    
+    # Create Monogram (First Letter)
+    initial = perfume.name[0].upper() if perfume.name else "P"
+    
+    # HTML Structure
     html = f"""
     <div class="perfume-card">
-        <img src="{img_url}" class="card-img" onerror="this.onerror=null; this.src='{fallback_img}';">
+        <div class="monogram">{initial}</div>
         
         <div class="card-content">
             <div class="card-name">{perfume.name}</div>
             <div class="card-notes">
                 <span class="highlight">NOTES:</span> {notes_str}
             </div>
-            <a href="{img_url}" target="_blank" class="card-link">VIEW DETAILS</a>
         </div>
         
-        <div class="card-score">
-            <div class="score-val">{perfume.score:.1f}</div>
-            <div class="score-stars">{stars}</div>
-            <div class="score-label">RATING</div>
+        <div class="card-rating">
+            <div class="rating-val">{perfume.score:.1f}</div>
+            <div class="rating-stars">{stars}</div>
         </div>
     </div>
     """
     st.markdown(html, unsafe_allow_html=True)
 
-# --- MAIN APPLICATION LOGIC ---
+# --- 6. MAIN APP ---
 load_custom_css()
 df, unique_accords = load_data("fra_perfumes.csv")
 
 if df is not None:
-    # Sidebar
+    # SIDEBAR
     with st.sidebar:
         st.markdown("### FIND YOUR SCENT")
         st.write("")
         
-        gender = st.radio("TARGET AUDIENCE", ["All", "Female", "Male", "Unisex"], label_visibility="collapsed")
+        # Gender
+        gender = st.radio("AUDIENCE", ["All", "Female", "Male", "Unisex"], label_visibility="collapsed")
         st.write("")
         
-        st.markdown("PREFERRED NOTES")
-        notes = st.multiselect("notes_selector", unique_accords, placeholder="e.g. Vanilla, Oud...", label_visibility="collapsed")
+        # Notes
+        st.markdown("NOTES")
+        notes = st.multiselect("notes_sel", unique_accords, placeholder="Choose notes...", label_visibility="collapsed")
         st.write("")
-
+        
+        # Rating
         st.markdown("MIN RATING")
-        score = st.slider("rating_slider", 1.0, 5.0, 4.0, 0.1, label_visibility="collapsed")
+        score = st.slider("rate", 1.0, 5.0, 4.0, 0.1, label_visibility="collapsed")
         
         st.markdown("---")
-        st.markdown("<div style='text-align:center; color:#444; font-size:10px'>DESIGNED BY MAGDALENA ROMANIECKA</div>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align:center; font-size:10px; color:#555'>© 2024 Magdalena Romaniecka</div>", unsafe_allow_html=True)
 
-    # Main Content
+    # HEADER
     st.markdown("""
         <div class="title-box">
             <h1 class="main-title">Perfume Finder</h1>
-            <div class="sub-title">Curated Fragrance Collection</div>
+            <div class="sub-title">Exclusive Fragrance Database</div>
         </div>
     """, unsafe_allow_html=True)
 
-    # Filter Logic
+    # LOGIC
     if gender == "All": filtered = df.copy()
     else: filtered = df[df['gender'] == gender].copy()
     
@@ -282,14 +287,13 @@ if df is not None:
     if notes:
         filtered = filtered[filtered['clean_accords'].apply(lambda x: all(n in x for n in notes))]
 
-    # Results Display
-    st.markdown(f"<div style='text-align: center; color: #666; font-size: 12px; margin-bottom: 30px;'>DISCOVERED {len(filtered)} FRAGRANCES</div>", unsafe_allow_html=True)
+    # OUTPUT
+    st.markdown(f"<div style='text-align:center; color:#666; margin-bottom:20px; font-size:12px'>FOUND {len(filtered)} FRAGRANCES</div>", unsafe_allow_html=True)
 
     if filtered.empty:
-        st.warning("No matches found. Try selecting fewer notes or a lower rating.")
+        st.warning("No perfumes found. Try adjusting filters.")
     else:
         for row in filtered.head(40).itertuples():
-            render_luxury_card(row)
-
+            render_card(row)
 else:
-    st.error("Could not load database.")
+    st.error("Error: Database not found.")
