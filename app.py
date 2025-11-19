@@ -57,7 +57,67 @@ def load_custom_css():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@600;700&display=swap');
 
-        /* --- NEW BUTTON STYLE (FRAGRANTICA) --- */
+        /* --- SIDEBAR REFINEMENT (SMALLER FONTS) --- */
+        section[data-testid="stSidebar"] {
+            background-color: #050505 !important;
+            border-right: 1px solid #222;
+        }
+        /* Headers in Sidebar */
+        .stSidebar h2, .stSidebar h3 {
+            font-family: 'Playfair Display', serif !important;
+            font-size: 12px !important; /* Smaller */
+            color: #D4AF37 !important;
+            margin-bottom: 5px !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        /* Widget Labels (Radio, Select, Slider) */
+        .stSidebar label p {
+            font-size: 11px !important; /* Smaller */
+            color: #AAA !important;
+            font-weight: 400 !important;
+        }
+        /* Compact spacing */
+        .stRadio, .stMultiSelect, .stSlider { margin-bottom: -20px !important; }
+        div[role="radiogroup"] { gap: 0px !important; }
+        
+        /* --- DROPDOWN MENU FIX --- */
+        div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
+            background-color: #0E0E0E !important;
+            border: 1px solid #333 !important;
+        }
+        li[role="option"] {
+             background-color: #0E0E0E !important;
+             color: #E0E0E0 !important;
+             font-size: 12px !important;
+        }
+        li[role="option"]:hover, li[role="option"][aria-selected="true"] {
+            background-color: #D4AF37 !important;
+            color: #000000 !important;
+        }
+        span[data-baseweb="tag"] {
+            background-color: #222 !important;
+            color: #D4AF37 !important;
+            border: 1px solid #444 !important;
+            font-size: 10px !important;
+        }
+
+        /* --- GENERAL APP STYLES --- */
+        header, [data-testid="stHeader"] {
+            background-color: #0E0E0E !important;
+            border-bottom: 1px solid #333;
+        }
+        .stApp {
+            background-color: #0E0E0E !important;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #000000 100%) !important;
+        }
+        * { font-family: 'Montserrat', sans-serif; color: #E0E0E0; }
+        h1 { font-family: 'Playfair Display', serif; color: #D4AF37 !important; }
+        
+        div[data-testid="stMetricValue"] { color: #D4AF37 !important; }
+        div[data-testid="stMetricLabel"] { color: #888 !important; }
+
+        /* BUTTON FRAGRANTICA */
         a.fragrantica-btn {
             display: inline-block;
             margin-top: 12px;
@@ -70,70 +130,11 @@ def load_custom_css():
             font-weight: bold;
             letter-spacing: 1px;
             transition: all 0.3s ease;
-            background-color: transparent;
         }
         a.fragrantica-btn:hover {
             background-color: #D4AF37;
             color: #000000 !important;
-            cursor: pointer;
         }
-
-        /* DROPDOWN FIX */
-        div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
-            background-color: #0E0E0E !important;
-            border: 1px solid #333 !important;
-        }
-        li[role="option"] {
-             background-color: #0E0E0E !important;
-             color: #E0E0E0 !important;
-        }
-        li[role="option"] div { color: #E0E0E0 !important; }
-        li[role="option"]:hover, li[role="option"][aria-selected="true"] {
-            background-color: #D4AF37 !important;
-            color: #000000 !important;
-        }
-        li[role="option"]:hover div, li[role="option"][aria-selected="true"] div {
-            color: #000000 !important;
-        }
-        span[data-baseweb="tag"] {
-            background-color: #222 !important;
-            color: #D4AF37 !important;
-            border: 1px solid #444 !important;
-        }
-
-        /* APP SETUP */
-        header, [data-testid="stHeader"] {
-            background-color: #0E0E0E !important;
-            border-bottom: 1px solid #333;
-        }
-        .stApp {
-            background-color: #0E0E0E !important;
-            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #000000 100%) !important;
-        }
-
-        /* SIDEBAR */
-        section[data-testid="stSidebar"] {
-            background-color: #050505 !important;
-            border-right: 1px solid #222;
-        }
-        .stRadio, .stMultiSelect, .stSlider { margin-bottom: -15px !important; }
-        div[role="radiogroup"] { gap: 0px !important; }
-        div[role="radiogroup"] label { padding: 0px !important; background: transparent !important; border: none !important; }
-        
-        .stMarkdown h2, .stMarkdown h3 {
-            font-size: 14px !important;
-            color: #D4AF37 !important;
-            margin-bottom: 5px !important;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* TYPOGRAPHY */
-        * { font-family: 'Montserrat', sans-serif; color: #E0E0E0; }
-        h1 { font-family: 'Playfair Display', serif; color: #D4AF37 !important; }
-        
-        div[data-testid="stMetricValue"] { color: #D4AF37 !important; }
-        div[data-testid="stMetricLabel"] { color: #888 !important; }
 
         [data-testid="stSidebarCollapsedControl"] {
             color: #D4AF37 !important;
@@ -141,7 +142,6 @@ def load_custom_css():
             background: rgba(212, 175, 55, 0.1);
             border-radius: 5px;
         }
-        
         hr { border-color: #333; margin: 1em 0; }
         </style>
     """, unsafe_allow_html=True)
@@ -181,11 +181,9 @@ def render_gold_card(perfume):
     initials = get_initials(perfume.name)
     
     with st.container():
-        # Layout
         col1, col2, col3 = st.columns([1, 3.5, 1.5])
         
         with col1:
-            # GOLD SEAL
             st.markdown(f"""
             <div style="
                 width: 60px; height: 60px; 
@@ -202,7 +200,6 @@ def render_gold_card(perfume):
             """, unsafe_allow_html=True)
         
         with col2:
-            # DETAILS + NEW BUTTON
             st.markdown(f"""
             <div style="border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 5px;">
                 <span style="font-family: 'Playfair Display'; font-size: 18px; color: #FFF; letter-spacing: 0.5px;">
@@ -214,7 +211,6 @@ def render_gold_card(perfume):
             </div>
             """, unsafe_allow_html=True)
             
-            # Styled Button for Link
             if pd.notna(perfume.img_link):
                 st.markdown(f"""
                 <a href='{perfume.img_link}' target='_blank' class='fragrantica-btn'>
@@ -223,7 +219,6 @@ def render_gold_card(perfume):
                 """, unsafe_allow_html=True)
 
         with col3:
-            # SCORE
             st.metric(label="SCORE", value=f"{perfume.score:.1f}", delta=stars)
         
         st.markdown("<hr style='margin: 15px 0; border-color: #222;'>", unsafe_allow_html=True)
@@ -248,13 +243,18 @@ if df is not None:
         score = st.slider("rating_slider", 1.0, 5.0, 4.0, 0.1, label_visibility="collapsed")
         
         st.markdown("---")
-        st.markdown("<div style='text-align:center; font-size:10px; color:#444'>© 2024 M. Romaniecka</div>", unsafe_allow_html=True)
+        # DATA SOURCE & COPYRIGHT UPDATED
+        st.markdown("""
+        <div style='text-align:center; font-size:9px; color:#555; line-height:1.6;'>
+            DATA SOURCE: FRAGRANTICA (KAGGLE)<br>
+            © 2025 MAGDALENA ROMANIECKA
+        </div>
+        """, unsafe_allow_html=True)
 
     # HEADER
     st.markdown("<h1 style='text-align:center; margin-bottom: 0px;'>PERFUME FINDER</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#666; font-size:11px; letter-spacing:3px; margin-bottom:30px;'>LUXURY FRAGRANCE DATABASE</p>", unsafe_allow_html=True)
 
-    # LOGIC
     if gender == "All": filtered = df.copy()
     else: filtered = df[df['gender'] == gender].copy()
     
@@ -262,7 +262,6 @@ if df is not None:
     if notes:
         filtered = filtered[filtered['clean_accords'].apply(lambda x: all(n in x for n in notes))]
 
-    # RESULTS
     st.markdown(f"<center style='color:#444; font-size:11px; margin-bottom:20px;'>{len(filtered)} RESULTS FOUND</center>", unsafe_allow_html=True)
 
     if filtered.empty:
