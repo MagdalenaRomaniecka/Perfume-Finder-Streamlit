@@ -57,31 +57,37 @@ def load_custom_css():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@600;700&display=swap');
 
-        /* --- SIDEBAR REFINEMENT (SMALLER FONTS) --- */
+        /* --- ELEGANT TITLE FRAME --- */
+        .title-frame {
+            border: 3px double #D4AF37;
+            padding: 30px;
+            margin-bottom: 40px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+        }
+
+        /* --- SIDEBAR --- */
         section[data-testid="stSidebar"] {
             background-color: #050505 !important;
             border-right: 1px solid #222;
         }
-        /* Headers in Sidebar */
         .stSidebar h2, .stSidebar h3 {
             font-family: 'Playfair Display', serif !important;
-            font-size: 12px !important; /* Smaller */
+            font-size: 12px !important;
             color: #D4AF37 !important;
             margin-bottom: 5px !important;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        /* Widget Labels (Radio, Select, Slider) */
         .stSidebar label p {
-            font-size: 11px !important; /* Smaller */
+            font-size: 11px !important;
             color: #AAA !important;
-            font-weight: 400 !important;
         }
-        /* Compact spacing */
         .stRadio, .stMultiSelect, .stSlider { margin-bottom: -20px !important; }
         div[role="radiogroup"] { gap: 0px !important; }
         
-        /* --- DROPDOWN MENU FIX --- */
+        /* --- DROPDOWN FIX --- */
         div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
             background-color: #0E0E0E !important;
             border: 1px solid #333 !important;
@@ -102,7 +108,7 @@ def load_custom_css():
             font-size: 10px !important;
         }
 
-        /* --- GENERAL APP STYLES --- */
+        /* --- GENERAL STYLES --- */
         header, [data-testid="stHeader"] {
             background-color: #0E0E0E !important;
             border-bottom: 1px solid #333;
@@ -229,9 +235,8 @@ df, unique_accords = load_data("fra_perfumes.csv")
 
 if df is not None:
     with st.sidebar:
-        st.header("FILTERS")
-        
-        st.markdown("### AUDIENCE")
+        # CHANGED TO "CATEGORY"
+        st.markdown("### CATEGORY")
         gender = st.radio("gender_select", ["All", "Female", "Male", "Unisex"], label_visibility="collapsed")
         
         st.write("")
@@ -243,7 +248,6 @@ if df is not None:
         score = st.slider("rating_slider", 1.0, 5.0, 4.0, 0.1, label_visibility="collapsed")
         
         st.markdown("---")
-        # DATA SOURCE & COPYRIGHT UPDATED
         st.markdown("""
         <div style='text-align:center; font-size:9px; color:#555; line-height:1.6;'>
             DATA SOURCE: FRAGRANTICA (KAGGLE)<br>
@@ -251,9 +255,15 @@ if df is not None:
         </div>
         """, unsafe_allow_html=True)
 
-    # HEADER
-    st.markdown("<h1 style='text-align:center; margin-bottom: 0px;'>PERFUME FINDER</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#666; font-size:11px; letter-spacing:3px; margin-bottom:30px;'>LUXURY FRAGRANCE DATABASE</p>", unsafe_allow_html=True)
+    # HEADER WITH ELEGANT FRAME
+    st.markdown("""
+    <div class="title-frame">
+        <h1 style='margin-bottom: 5px; font-size: 42px; letter-spacing: 5px;'>PERFUME FINDER</h1>
+        <p style='color:#888; font-size:11px; letter-spacing:4px; margin:0; text-transform: uppercase;'>
+            Luxury Fragrance Database
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     if gender == "All": filtered = df.copy()
     else: filtered = df[df['gender'] == gender].copy()
