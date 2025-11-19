@@ -1,68 +1,31 @@
-# 🔎 Perfume Finder: Intelligent Fragrance Search Engine
-## 🚀 Live Demo
+# 💎 Perfume Finder: Luxury Analytics App
 
-[**Click here to see the live application!**](https://perfume-finder-app-btskyvq7eytc5ujrgzr2dk.streamlit.app/)
-## Project Goal
+[**🟢 Live Demo Application**](https://perfume-finder-app-btskyvq7eytc5ujrgzr2dk.streamlit.app/)
 
-The **Perfume Finder** project is an interactive web application built using Streamlit and the Pandas library. Its purpose is to explore and filter a vast collection of perfumery data, enabling users to quickly find perfumes matched to their preferences based on main fragrance accords, gender, and rating score.
+## 📌 Project Overview
+**Perfume Finder** is an interactive web application designed to bridge the gap between raw fragrance data and user experience. Unlike standard databases, this tool offers a "Luxury Tech" interface to filter thousands of perfumes based on olfactory notes, gender categories, and user ratings.
 
-## Data Source
+## 🚀 Key Features
+* **Advanced Filtering Logic:** Multi-parameter search (Gender, Olfactory Notes, Rating Threshold).
+* **Data Cleaning Engine:** Custom Python algorithms (`brutal_clean`) to parse and standardize raw text data from Fragrantica.
+* **Web Analytics (GA4):** Integrated **Google Analytics 4** to track user engagement, popular search filters, and session duration.
+* **UX/UI Design:** Custom CSS implementation for a "Dark Luxury" aesthetic, utilizing gold accents (#D4AF37) and responsive glassmorphism.
 
-The application uses data downloaded from Kaggle—a dataset sourced from Fragrantica.com (specifically the `fra_perfumes.csv` file).
+## 🛠️ Tech Stack
+* **Language:** Python 3.9+
+* **Framework:** Streamlit
+* **Data Manipulation:** Pandas
+* **Analytics:** Google Analytics 4 (via JS injection)
 
-## Key Features
+## 📊 Analytics Implementation
+This project demonstrates **Web Analytics** skills by injecting custom JavaScript trackers into the Streamlit header. This allows for real-time monitoring of:
+1.  Active users.
+2.  Most filtered perfume notes.
+3.  User retention rates.
 
-1.  **Advanced Filtering:** Filter perfumes based on selected accords (e.g., "vanilla", "woody", "citrus"), gender, and a minimum user rating.
-2.  **Results Gallery:** Display matching perfumes in a dynamic gallery format with images and key information.
-3.  **Market Insights:** A second tab provides visual analysis of market trends, such as rating distribution and the most popular fragrance accords using Plotly.
+## 📂 Data Source
+Dataset sourced from [Kaggle (Fragrantica)](https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset).
+*Note: The dataset `fra_perfumes.csv` is processed internally for optimal performance.*
 
-## 🚀 Getting Started: Running the App Locally
-
-Follow these simple steps to get the Perfume Finder running on your own computer.
-
-### Step 1: Prerequisites (What You Need)
-
-Before you begin, make sure you have the following installed:
-* **Python:** Version 3.9 or newer is recommended.
-* **Git:** (Optional, but good for downloading from GitHub).
-
-### Step 2: Download the Project & Data
-
-1.  **Clone the repository** (or download the ZIP file):
-    ```bash
-    git clone [https://github.com/MagdalenaRomaniecka/Perfume-Finder-Streamlit.git](https://github.com/MagdalenaRomaniecka/Perfume-Finder-Streamlit.git)
-    ```
-2.  **Navigate into the project folder:**
-    ```bash
-    cd Perfume-Finder-Streamlit
-    ```
-3.  **Add your data file:** Download the `fra_perfumes.csv` file from the [Kaggle Dataset](https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset) and place it **inside** the `Perfume-Finder-Streamlit` folder.
-
-    Your folder must look like this:
-    ```text
-    Perfume-Finder-Streamlit/
-    ├── app.py
-    ├── fra_perfumes.csv    # <-- IMPORTANT!
-    ├── requirements.txt
-    └── README.md
-    ```
-
-### Step 3: Install Dependencies
-
-While in the project folder, install all required libraries with this command:
-
-```bash
-pip install -r requirements.txt
-streamlit run app.py
-## Acknowledgements
-
-This project utilizes an open dataset created by Olga Gmiufana.
-## Acknowledgements
-
-This project utilizes an open dataset created by Olga Gmiufana.
-
-* **Dataset:** Fragrantica.com Fragrance Dataset
-* **Author:** Olga Gmiufana
-* **Kaggle Source:** [https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset](https://www.kaggle.com/datasets/olgagmiufana1/fragrantica-com-fragrance-dataset)
-
-
+---
+*Created by Magdalena Romaniecka © 2025*
