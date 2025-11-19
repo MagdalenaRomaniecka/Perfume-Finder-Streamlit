@@ -108,6 +108,22 @@ def load_custom_css():
             font-size: 10px !important;
         }
 
+        /* --- SLIDER IMPROVEMENT --- */
+        /* Make the current value text huge and gold */
+        div[data-testid="stThumbValue"] {
+            color: #D4AF37 !important;
+            font-weight: bold !important;
+            font-size: 14px !important;
+        }
+        /* The slider track */
+        div[data-testid="stSlider"] div[data-baseweb="slider"] div {
+            background-color: #333 !important;
+        }
+        /* The filled part of slider */
+        div[data-testid="stSlider"] div[data-baseweb="slider"] div div {
+            background-color: #D4AF37 !important;
+        }
+
         /* --- GENERAL STYLES --- */
         header, [data-testid="stHeader"] {
             background-color: #0E0E0E !important;
@@ -123,7 +139,7 @@ def load_custom_css():
         div[data-testid="stMetricValue"] { color: #D4AF37 !important; }
         div[data-testid="stMetricLabel"] { color: #888 !important; }
 
-        /* BUTTON FRAGRANTICA */
+        /* FRAGRANTICA BUTTON */
         a.fragrantica-btn {
             display: inline-block;
             margin-top: 12px;
@@ -190,6 +206,7 @@ def render_gold_card(perfume):
         col1, col2, col3 = st.columns([1, 3.5, 1.5])
         
         with col1:
+            # GOLD SEAL
             st.markdown(f"""
             <div style="
                 width: 60px; height: 60px; 
@@ -221,63 +238,3 @@ def render_gold_card(perfume):
                 st.markdown(f"""
                 <a href='{perfume.img_link}' target='_blank' class='fragrantica-btn'>
                    VIEW ON FRAGRANTICA ↗
-                </a>
-                """, unsafe_allow_html=True)
-
-        with col3:
-            st.metric(label="SCORE", value=f"{perfume.score:.1f}", delta=stars)
-        
-        st.markdown("<hr style='margin: 15px 0; border-color: #222;'>", unsafe_allow_html=True)
-
-# --- 7. MAIN APP ---
-load_custom_css()
-df, unique_accords = load_data("fra_perfumes.csv")
-
-if df is not None:
-    with st.sidebar:
-        # CHANGED TO "CATEGORY"
-        st.markdown("### CATEGORY")
-        gender = st.radio("gender_select", ["All", "Female", "Male", "Unisex"], label_visibility="collapsed")
-        
-        st.write("")
-        st.markdown("### NOTES")
-        notes = st.multiselect("notes_select", unique_accords, placeholder="Select...", label_visibility="collapsed")
-        
-        st.write("")
-        st.markdown("### RATING")
-        score = st.slider("rating_slider", 1.0, 5.0, 4.0, 0.1, label_visibility="collapsed")
-        
-        st.markdown("---")
-        st.markdown("""
-        <div style='text-align:center; font-size:9px; color:#555; line-height:1.6;'>
-            DATA SOURCE: FRAGRANTICA (KAGGLE)<br>
-            © 2025 MAGDALENA ROMANIECKA
-        </div>
-        """, unsafe_allow_html=True)
-
-    # HEADER WITH ELEGANT FRAME
-    st.markdown("""
-    <div class="title-frame">
-        <h1 style='margin-bottom: 5px; font-size: 42px; letter-spacing: 5px;'>PERFUME FINDER</h1>
-        <p style='color:#888; font-size:11px; letter-spacing:4px; margin:0; text-transform: uppercase;'>
-            Luxury Fragrance Database
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if gender == "All": filtered = df.copy()
-    else: filtered = df[df['gender'] == gender].copy()
-    
-    filtered = filtered[filtered['score'] >= score]
-    if notes:
-        filtered = filtered[filtered['clean_accords'].apply(lambda x: all(n in x for n in notes))]
-
-    st.markdown(f"<center style='color:#444; font-size:11px; margin-bottom:20px;'>{len(filtered)} RESULTS FOUND</center>", unsafe_allow_html=True)
-
-    if filtered.empty:
-        st.warning("No perfumes found.")
-    else:
-        for row in filtered.head(40).itertuples():
-            render_gold_card(row)
-else:
-    st.error("Error loading database.")
