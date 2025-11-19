@@ -51,10 +51,11 @@ def get_initials(name):
         return (words[0][0] + words[1][0]).upper()
     return clean[:2].upper()
 
-# --- 4. CSS STYLING ---
+# --- 4. CSS STYLING (SAFE MODE) ---
 def load_custom_css():
-    st.markdown("""
-        <style>
+    # Defined as a variable to prevent SyntaxError
+    styles = """
+    <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@600;700&display=swap');
 
         /* --- ELEGANT TITLE FRAME --- */
@@ -87,4 +88,4 @@ def load_custom_css():
         .stRadio, .stMultiSelect, .stSlider { margin-bottom: -20px !important; }
         div[role="radiogroup"] { gap: 0px !important; }
         
-        /* --- DRO
+        /* --- DROPDOWN FIX
