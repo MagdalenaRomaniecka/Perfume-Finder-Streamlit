@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-# --- KONFIGURACJA STRONY ---
+# --- Page Configuration ---
 st.set_page_config(
     page_title="Perfume Finder",
     page_icon="✨",
@@ -9,44 +9,45 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- CSS: CZYSTY MOBILE, WYSOKI KONTRAST ---
+# --- CSS: Mobile-First, High Contrast, Luxury Design ---
 def load_custom_css():
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
 
-        /* TŁO - GŁĘBOKA CZERŃ */
+        /* --- GLOBAL DARK THEME --- */
         html, body, [class*="st-"], [class*="css-"] {
             font-family: 'Montserrat', sans-serif;
             color: #E0E0E0;
-            background-color: #050505;
+            background-color: #050505; /* Deepest Black */
         }
         [data-testid="stAppViewContainer"] { background-color: #050505; }
         
-        /* UKRYCIE NAGŁÓWKA STREAMLIT (Klawiatura/Menu) */
+        /* --- HIDE DEFAULT STREAMLIT HEADER & SIDEBAR --- */
         header { visibility: hidden; }
         [data-testid="stHeader"] { display: none; }
         [data-testid="stSidebarCollapsedControl"] { display: none !important; }
         section[data-testid="stSidebar"] { display: none; }
         
+        /* Adjust top padding since header is gone */
         .block-container { padding-top: 2rem !important; }
 
-        /* --- KONTRASTOWE ELEMENTY --- */
+        /* --- HIGH CONTRAST INPUTS --- */
         
-        /* Etykiety */
+        /* Widget Labels */
         label p {
-            color: #D4AF37 !important; /* Złoty */
+            color: #D4AF37 !important; /* Gold */
             font-size: 13px !important;
             font-weight: 600 !important;
+            text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        /* Radio Buttons (Płeć) */
+        /* Radio Buttons (Gender) */
         div[role="radiogroup"] label div[data-testid="stMarkdownContainer"] p {
-            color: #FFFFFF !important;
+            color: #FFFFFF !important; /* Bright White Text */
             font-weight: 500 !important;
         }
-        /* Złote kółka */
         div[role="radiogroup"] div[data-baseweb="radio"] div {
             border-color: #D4AF37 !important;
         }
@@ -54,15 +55,16 @@ def load_custom_css():
             background-color: #D4AF37 !important;
         }
         
-        /* Suwak (Ocena) */
+        /* Slider (Rating) */
         div[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p {
-            color: #FFFFFF !important;
+            color: #FFFFFF !important; /* Bright White Numbers */
+            font-weight: 600 !important;
         }
         div[data-testid="stSlider"] div[data-baseweb="slider"] div {
             background-color: #D4AF37 !important;
         }
 
-        /* Multiselect (Nuty) */
+        /* Multiselect (Notes) */
         .stMultiSelect div[data-baseweb="select"] span {
             color: #FFFFFF !important;
         }
@@ -74,15 +76,16 @@ def load_custom_css():
             background-color: #1A1A1A !important;
         }
 
-        /* Panel Filtrów */
+        /* --- EXPANDER STYLING --- */
         .streamlit-expanderHeader {
-            background-color: #111 !important;
+            background-color: #111111 !important;
             border: 1px solid #333 !important;
             color: #D4AF37 !important;
+            font-family: 'Montserrat', sans-serif;
             border-radius: 5px;
         }
         
-        /* Karty Perfum */
+        /* --- PERFUME CARD STYLING --- */
         .perfume-card {
             background-color: #121212;
             border-top: 1px solid #333;
@@ -93,11 +96,11 @@ def load_custom_css():
         
         .p-name {
             font-family: 'Playfair Display', serif;
-            font-size: 20px;
+            font-size: 18px;
             color: #FFFFFF;
-            font-weight: 700;
+            font-weight: 600;
+            margin-bottom: 5px;
             line-height: 1.2;
-            margin: 0 0 5px 0;
         }
 
         .p-rating {
@@ -105,37 +108,36 @@ def load_custom_css():
             color: #D4AF37; 
             font-weight: 700;
             letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         .p-notes {
             font-size: 11px;
-            color: #999;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: #888888;
             margin-top: 6px;
             line-height: 1.4;
         }
 
         .p-link {
-            font-size: 11px;
-            color: #D4AF37;
+            font-size: 10px;
+            color: #555;
             text-decoration: none;
-            font-weight: 600;
+            margin-left: 10px;
             border: 1px solid #333;
-            padding: 4px 10px;
+            padding: 2px 6px;
             border-radius: 4px;
             display: inline-block;
             margin-top: 10px;
         }
 
-        /* Tytuł */
+        /* --- HEADER TYPOGRAPHY --- */
         .main-title {
             font-family: 'Playfair Display', serif;
-            font-size: 26px;
+            font-size: 28px;
             color: #D4AF37;
             text-align: center;
-            font-weight: 700;
             margin-bottom: 5px;
+            font-weight: 700;
         }
         .sub-title {
             font-family: 'Montserrat', sans-serif;
@@ -149,33 +151,37 @@ def load_custom_css():
         </style>
     """, unsafe_allow_html=True)
 
-# --- ŁADOWANIE DANYCH ---
+# --- Data Loading & Processing ---
 @st.cache_data
-def load_data(filepath, force_fix_v99): 
+def load_data(filepath): 
     try:
         df = pd.read_csv(filepath)
+        # Standardize column names
         df.rename(columns={'Name': 'name', 'Gender': 'gender', 'Rating Value': 'score', 'Rating Count': 'ratings', 'Main Accords': 'main_accords', 'url': 'img_link'}, inplace=True)
         
-        # Fix Names
+        # 1. Fix concatenated names (e.g., remove 'for women' from name string)
         if 'name' in df.columns and 'gender' in df.columns:
             df['name'] = df.apply(
                 lambda row: str(row['name']).replace(str(row['gender']), '').strip() 
                 if pd.notna(row['name']) and pd.notna(row['gender']) else row['name'], axis=1
             )
         
-        # Map Gender
+        # 2. Standardize Gender Categories
         gender_map = {'for women': 'Female', 'for men': 'Male', 'for women and men': 'Unisex'}
         df['gender'] = df['gender'].map(gender_map)
         
-        # Clean
+        # 3. Remove incomplete rows
         df.dropna(subset=['main_accords', 'name', 'img_link', 'gender'], inplace=True)
+        
+        # 4. Ensure numeric score
         if df['score'].dtype == 'object':
             df['score'] = df['score'].str.replace(',', '.').astype(float)
             
+        # 5. Extract and clean unique accords for filter list
         all_accords = set()
         for accords_str in df['main_accords'].dropna():
             if isinstance(accords_str, str):
-                # Agresywne czyszczenie
+                # Clean artifacts like brackets and quotes
                 raw_list = accords_str.replace("[", "").replace("]", "").replace("'", "").replace('"', "").split(",")
                 for item in raw_list:
                     clean_item = item.strip().lower()
@@ -186,10 +192,10 @@ def load_data(filepath, force_fix_v99):
         return None, []
 
 def render_card(perfume):
-    """Render Clean HTML Card"""
+    """Renders a clean HTML card for the perfume."""
     notes_str = ""
     if isinstance(perfume.main_accords, str):
-        # Agresywne czyszczenie do wyświetlania
+        # Clean notes string for display
         raw = perfume.main_accords.replace("[", "").replace("]", "").replace("'", "").replace('"', "").split(",")
         clean = [n.strip().strip("'\"").strip().lower() for n in raw[:4] if n.strip()]
         notes_str = ", ".join(clean)
@@ -208,34 +214,36 @@ def render_card(perfume):
     """
     st.markdown(html, unsafe_allow_html=True)
 
-# --- GŁÓWNA LOGIKA ---
+# --- Main Application Logic ---
 load_custom_css()
-df, unique_accords = load_data("fra_perfumes.csv", force_fix_v99="v99")
+# Added dummy parameter to force cache invalidation for this version
+df, unique_accords = load_data("fra_perfumes.csv") 
 
 if df is not None:
     
-    # --- TYTUŁ ---
+    # --- Header ---
     st.markdown('<div class="main-title">PERFUME FINDER</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">LUXURY DATABASE</div>', unsafe_allow_html=True)
     
-    # --- FILTRY ---
+    # --- Filter Section ---
     with st.expander("⚡ FILTERS", expanded=True):
-        # Płeć (Domyślnie All)
+        # Gender Selection
         gender = st.radio("GENDER", ["All", "Female", "Male", "Unisex"], horizontal=True)
         st.write("")
         
-        # Ocena
+        # Rating Selection
         score = st.slider("MIN RATING", 1.0, 5.0, 4.0, 0.1)
         st.write("")
         
-        # Nuty
+        # Ingredient Selection
         notes = st.multiselect("NOTES", unique_accords, placeholder="Select ingredients...")
         
-    # --- LOGIKA FILTROWANIA ---
+    # --- Filtering Engine ---
     if gender == "All":
         filtered = df.copy()
     else:
         filtered = df[df['gender'] == gender].copy()
+
     filtered = filtered[filtered['score'] >= score]
     
     if notes:
@@ -245,16 +253,17 @@ if df is not None:
             return all(note in row_clean for note in notes)
         filtered = filtered[filtered['main_accords'].apply(check_notes)]
 
-    # --- WYNIKI ---
+    # --- Results Display ---
     st.write("")
     st.markdown(f"<div style='text-align: center; color: #666; font-size: 11px; margin-bottom: 20px;'>FOUND {len(filtered)} RESULTS</div>", unsafe_allow_html=True)
 
     if filtered.empty:
         st.info("No perfumes found.")
     else:
+        # Limit results for performance
         for row in filtered.head(40).itertuples():
             render_card(row)
             
-    st.markdown("<br><br><div style='text-align: center; color: #333; font-size: 10px;'>© 2024</div>", unsafe_allow_html=True)
+    st.markdown("<br><br><div style='text-align: center; color: #333; font-size: 10px;'>© 2024 Portfolio Project</div>", unsafe_allow_html=True)
 else:
-    st.error("Data Error")
+    st.error("Data Error: Could not load dataset.")
