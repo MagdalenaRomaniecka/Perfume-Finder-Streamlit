@@ -1,3 +1,9 @@
+> **⚠️ ECOSYSTEM NOTICE:** This repository is a sub-module/satellite project. The logic, data, and algorithms developed here have been integrated into the final, comprehensive master project. 
+> 
+> **👉 [CLICK HERE TO VIEW THE MAIN PROJECT: GLOBAL FRAGRANCE INTELLIGENCE HUB](https://github.com/MagdalenaRomaniecka/Global-Fragrance-Intelligence-Hub) 👈**
+
+---
+
 # 💎 Perfume Finder: Luxury Analytics App
 
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)
@@ -67,5 +73,6 @@ To run this app on your own machine:
 <div align="center">
     
 **Created by Magdalena Romaniecka** *Data Analyst & Web Analytics Enthusiast* © 2025
+
 
 </div>
